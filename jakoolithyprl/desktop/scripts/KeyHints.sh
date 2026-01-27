@@ -31,7 +31,8 @@ GDK_BACKEND=$BACKEND yad \
 " SHIFT enter" "DropDown Terminal" " Q to close" \
 " B" "Launch Browser" "(Default browser)" \
 " A" "Desktop Overview" "(AGS - if opted to install)" \
-" D" "Application Launcher" "(rofi-wayland)" \
+" R" "Application Launcher" "(rofi-wayland)" \
+" D" "Application Launcher" "(Discord)" \
 " E" "Open File Manager" "(Thunar)" \
 " S" "Google Search using rofi" "(rofi)" \
 " Q" "close active window" "(not kill)" \
