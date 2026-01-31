@@ -1,0 +1,4 @@
+# Host profile selector (local to this machine).
+# set-hypr-profile.sh rewrites UserConfigs/Host.conf to point at the active profile.
+$RepoRoot = /path/to/this/repo/jakoolithyprl
+source = $RepoRoot/profiles/laptop.conf
