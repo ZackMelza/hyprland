@@ -14,8 +14,7 @@ declare -A online_music=(
   ["synthwave radio 🌌 beats to chill/game to"]="https://www.youtube.com/watch?v=4xDzrJKXOOY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=2" 
   ["jazz lofi radio 🎷 beats to chill/study to"]="https://www.youtube.com/watch?v=HuFYqnbVbzY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=4"
   ["lofi hip hop radio 💤 beats to sleep/chill to"]="https://www.youtube.com/watch?v=28KRPhVzCus&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=5"
-  ["sleep ambient radio 💤 relaxing music to fall asleep to"]="sleep ambient radio 💤 relaxing music to fall asleep to
-"
+  ["sleep ambient radio 💤 relaxing music to fall asleep to"]="https://www.youtube.com/watch?v=28KRPhVzCus&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=6"
   ["Study With Me 📚 Pomodoro"]="https://www.youtube.com/watch?v=1oDrJba2PSs&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=8"
   ["chill guitar radio 🎸 music to study/relax to"]="https://www.youtube.com/watch?v=E_XmwjgRLz8&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=10"
   ["bossa lofi radio 🌴 chill music for relaxing days"]="https://www.youtube.com/watch?v=Zq9-4INDsvY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=11"
