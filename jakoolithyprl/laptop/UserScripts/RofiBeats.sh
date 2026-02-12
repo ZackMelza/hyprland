@@ -9,7 +9,8 @@ iDIR="$HOME/.config/swaync/icons"
 rofi_theme="$HOME/.config/rofi/config-rofi-Beats.rasi"
 rofi_theme_menu="$HOME/.config/rofi/config-rofi-Beats-menu.rasi"
 MPV_SOCKET="${XDG_RUNTIME_DIR:-/tmp}/rofibeats-mpv.sock"
-rofi_size_override='window { width: 56%; } listview { lines: 5; columns: 2; fixed-columns: true; dynamic: false; }'
+rofi_size_override='window { width: 88%; } listview { lines: 5; columns: 2; fixed-columns: true; dynamic: false; }'
+rofi_search_override='window { width: 92%; } listview { lines: 10; columns: 1; fixed-columns: true; dynamic: false; }'
 
 # Preset YouTube links (edit freely)
 declare -A online_music=(
@@ -39,7 +40,8 @@ error_notification() {
 rofi_menu() {
   local prompt="$1"
   local theme="$2"
-  rofi -i -dmenu -p "$prompt" -config "$theme" -theme-str "$rofi_size_override"
+  local override="${3:-$rofi_size_override}"
+  rofi -i -dmenu -p "$prompt" -config "$theme" -theme-str "$override"
 }
 
 rofi_input() {
@@ -174,27 +176,53 @@ search_youtube() {
   [ -z "$query" ] && return
 
   if command -v yt-dlp >/dev/null 2>&1; then
-    local results=() urls=() video_id title idx picked_index
+    local results=() urls=() video_id title duration_str live_status channel uploader meta idx picked_index
     local delim=$'\x1f'
 
     # Method 1: flat search (fast).
-    while IFS="$delim" read -r video_id title; do
+    while IFS="$delim" read -r video_id title duration_str live_status channel uploader; do
       [ -z "${video_id:-}" ] && continue
       [ -z "${title:-}" ] && continue
+      if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+        channel="${uploader:-Unknown Channel}"
+      fi
+      if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+        channel="Unknown Channel"
+      fi
+      if [ "${live_status:-}" = "is_live" ]; then
+        meta="[LIVE]"
+      elif [ -n "${duration_str:-}" ] && [ "${duration_str:-}" != "NA" ]; then
+        meta="[$duration_str]"
+      else
+        meta="[--:--]"
+      fi
       idx=$(( ${#results[@]} + 1 ))
-      results+=("[$idx] $title")
+      results+=("[$idx] $title  -  $channel  $meta")
       urls+=("https://www.youtube.com/watch?v=$video_id")
-    done < <(yt-dlp --no-warnings --flat-playlist --print "%(id)s${delim}%(title)s" "ytsearch12:${query}" 2>/dev/null)
+    done < <(yt-dlp --no-warnings --flat-playlist --print "%(id)s${delim}%(title)s${delim}%(duration_string|NA)s${delim}%(live_status|NA)s${delim}%(channel|NA)s${delim}%(uploader|NA)s" "ytsearch12:${query}" 2>/dev/null)
 
     # Method 2: non-flat search fallback for yt-dlp variants where flat output is empty.
     if [ "${#results[@]}" -eq 0 ]; then
-      while IFS="$delim" read -r video_id title; do
+      while IFS="$delim" read -r video_id title duration_str live_status channel uploader; do
         [ -z "${video_id:-}" ] && continue
         [ -z "${title:-}" ] && continue
+        if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+          channel="${uploader:-Unknown Channel}"
+        fi
+        if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+          channel="Unknown Channel"
+        fi
+        if [ "${live_status:-}" = "is_live" ]; then
+          meta="[LIVE]"
+        elif [ -n "${duration_str:-}" ] && [ "${duration_str:-}" != "NA" ]; then
+          meta="[$duration_str]"
+        else
+          meta="[--:--]"
+        fi
         idx=$(( ${#results[@]} + 1 ))
-        results+=("[$idx] $title")
+        results+=("[$idx] $title  -  $channel  $meta")
         urls+=("https://www.youtube.com/watch?v=$video_id")
-      done < <(yt-dlp --no-warnings --print "%(id)s${delim}%(title)s" "ytsearch12:${query}" 2>/dev/null)
+      done < <(yt-dlp --no-warnings --print "%(id)s${delim}%(title)s${delim}%(duration_string|NA)s${delim}%(live_status|NA)s${delim}%(channel|NA)s${delim}%(uploader|NA)s" "ytsearch12:${query}" 2>/dev/null)
     fi
 
     if [ "${#results[@]}" -eq 0 ]; then
@@ -203,7 +231,7 @@ search_youtube() {
       return
     fi
 
-    selection="$(printf "%s\n" "${results[@]}" | rofi_menu "Select Result" "$rofi_theme")"
+    selection="$(printf "%s\n" "${results[@]}" | rofi_menu "Select Result" "$rofi_theme" "$rofi_search_override")"
     [ -z "$selection" ] && return
 
     picked_index="${selection#\[}"
