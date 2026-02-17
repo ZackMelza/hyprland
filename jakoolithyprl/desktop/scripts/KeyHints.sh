@@ -32,7 +32,7 @@ GDK_BACKEND=$BACKEND yad \
 " B" "Launch Browser" "(Default browser)" \
 " A" "Desktop Overview" "(AGS - if opted to install)" \
 " R" "Application Launcher" "(rofi-wayland)" \
-" D" "Application Launcher" "(Discord)" \
+" D" "Launch Discord" "(Discord)" \
 " E" "Open File Manager" "(Thunar)" \
 " S" "Google Search using rofi" "(rofi)" \
 " Q" "close active window" "(not kill)" \
