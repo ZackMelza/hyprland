@@ -3,3 +3,5 @@
 **/wallust/wallust-hyprland.conf
 jakoolithyprl/**/monitors.conf
 jakoolithyprl/**/workspaces.conf
+jakoolithyprl/active/
+.codex
