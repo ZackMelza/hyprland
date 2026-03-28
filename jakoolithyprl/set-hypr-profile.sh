@@ -117,13 +117,13 @@ build_active_tree() {
   local rel=""
   local source_path=""
   local target_path=""
+  local name=""
 
   mkdir -p "$active_dir" "$active_userconfigs_dir" \
     "$active_dir/wallpaper_effects" "$active_dir/wallust"
 
   for rel in \
     Monitor_Profiles \
-    UserScripts \
     animations \
     configs \
     scripts \
@@ -138,6 +138,21 @@ build_active_tree() {
     source_path="$repo_root/common/$rel"
     target_path="$active_dir/$rel"
     link_managed_path "$source_path" "$target_path"
+  done
+
+  rm -rf "$active_dir/UserScripts"
+  mkdir -p "$active_dir/UserScripts"
+  for source_path in "$repo_root/common/UserScripts/"*; do
+    [[ -e "$source_path" ]] || continue
+    link_managed_path "$source_path" "$active_dir/UserScripts/$(basename "$source_path")"
+  done
+
+  for source_path in "$profile_dir/UserScripts/"*; do
+    [[ -e "$source_path" ]] || continue
+    name="$(basename "$source_path")"
+    if [[ ! -e "$repo_root/common/UserScripts/$name" || "$name" == "WallpaperAutoChange.sh" || "$name" == "WallpaperRandom.sh" ]]; then
+      link_managed_path "$source_path" "$active_dir/UserScripts/$name"
+    fi
   done
 
   for source_path in "$repo_root/common/UserConfigs/"*; do
