@@ -8,6 +8,17 @@ wallDIR="$HOME/Pictures/wallpapers"
 SCRIPTSDIR="$HOME/.config/hypr/scripts"
 wallpaper_current="$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
 
+if command -v swww >/dev/null 2>&1; then
+  wallpaper_cmd="swww"
+  wallpaper_daemon="swww-daemon"
+elif command -v awww >/dev/null 2>&1; then
+  wallpaper_cmd="awww"
+  wallpaper_daemon="awww-daemon"
+else
+  notify-send -i "$HOME/.config/swaync/images/error.png" "Wallpaper backend missing" "Install swww or awww"
+  exit 1
+fi
+
 # Directory for swaync
 iDIR="$HOME/.config/swaync/images"
 iDIRi="$HOME/.config/swaync/icons"
@@ -45,7 +56,7 @@ rofi_override="element-icon{size:${adjusted_icon_size}%;}"
 
 # Kill existing wallpaper daemons for video
 kill_wallpaper_for_video() {
-  swww kill 2>/dev/null
+  "$wallpaper_cmd" kill 2>/dev/null
   pkill mpvpaper 2>/dev/null
   pkill swaybg 2>/dev/null
   pkill hyprpaper 2>/dev/null
@@ -150,6 +161,7 @@ modify_startup_config() {
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
     # For video wallpapers:
     sed -i '/^\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^/\#/' "$startup_config"
+    sed -i '/^\s*exec-once\s*=\s*awww-daemon\s*$/s/^/\#/' "$startup_config"
     sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^#\s*//;' "$startup_config"
 
     # Update the livewallpaper variable with the selected video path (using $HOME)
@@ -160,6 +172,7 @@ modify_startup_config() {
   else
     # For image wallpapers:
     sed -i '/^\s*#\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
+    sed -i '/^\s*#\s*exec-once\s*=\s*awww-daemon\s*$/s/^\s*#\s*//;' "$startup_config"
 
     sed -i '/^\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^/\#/' "$startup_config"
 
@@ -173,12 +186,16 @@ apply_image_wallpaper() {
 
   kill_wallpaper_for_image
 
-  if ! pgrep -x "swww-daemon" >/dev/null; then
-    echo "Starting swww-daemon..."
-    swww-daemon --format xrgb &
+  if ! pgrep -x "$wallpaper_daemon" >/dev/null; then
+    echo "Starting $wallpaper_daemon..."
+    if [[ "$wallpaper_daemon" == "swww-daemon" ]]; then
+      swww-daemon --format xrgb &
+    else
+      awww-daemon &
+    fi
   fi
 
-  swww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
+  "$wallpaper_cmd" img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
 
   # Run additional scripts (pass the image path to avoid cache race conditions)
   "$SCRIPTSDIR/WallustSwww.sh" "$image_path"

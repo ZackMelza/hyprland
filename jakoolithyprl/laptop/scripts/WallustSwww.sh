@@ -11,6 +11,15 @@ cache_dir="$HOME/.cache/swww/"
 rofi_link="$HOME/.config/rofi/.current_wallpaper"
 wallpaper_current="$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
 
+if command -v swww >/dev/null 2>&1; then
+  wallpaper_cmd="swww"
+elif command -v awww >/dev/null 2>&1; then
+  wallpaper_cmd="awww"
+  cache_dir="$HOME/.cache/awww/"
+else
+  wallpaper_cmd=""
+fi
+
 # Helper: get focused monitor name (prefer JSON)
 get_focused_monitor() {
   if command -v jq >/dev/null 2>&1; then
@@ -39,7 +48,21 @@ else
 
   if [[ -f "$cache_file" ]]; then
     # The first non-filter line is the original wallpaper path
-    wallpaper_path="$(grep -v 'Lanczos3' "$cache_file" | head -n 1)"
+    wallpaper_path="$(strings "$cache_file" | grep -v '^Lanczos3$' | head -n 1)"
+  fi
+
+  if [[ -z "$wallpaper_path" && -n "$wallpaper_cmd" ]]; then
+    wallpaper_path="$("$wallpaper_cmd" query 2>/dev/null | awk -v mon="$current_monitor" '
+      /^Monitor/ {
+        cur=$2
+        gsub(":", "", cur)
+      }
+      /image:/ && cur==mon {
+        sub(/^.*image: /,"")
+        print
+        exit
+      }
+    ')"
   fi
 fi
 
