@@ -1,1 +1,1 @@
-../../common/scripts/WallustSwww.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/WallustSwww.sh

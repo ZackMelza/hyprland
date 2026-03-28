@@ -1,1 +1,1 @@
-../../common/scripts/BrightnessKbd.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/BrightnessKbd.sh

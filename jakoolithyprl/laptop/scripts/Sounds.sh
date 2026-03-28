@@ -1,1 +1,1 @@
-../../common/scripts/Sounds.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/Sounds.sh

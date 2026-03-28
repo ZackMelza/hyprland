@@ -1,1 +1,1 @@
-../../common/scripts/Refresh.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/Refresh.sh

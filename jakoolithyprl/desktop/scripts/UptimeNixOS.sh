@@ -1,1 +1,1 @@
-../../common/scripts/UptimeNixOS.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/UptimeNixOS.sh

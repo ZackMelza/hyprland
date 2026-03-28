@@ -1,1 +1,1 @@
-../../common/scripts/Hypridle.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/Hypridle.sh

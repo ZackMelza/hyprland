@@ -1,1 +1,1 @@
-../../common/scripts/MediaCtrl.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/MediaCtrl.sh

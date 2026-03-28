@@ -1,1 +1,1 @@
-../../common/scripts/Battery.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/Battery.sh

@@ -1,1 +1,1 @@
-../../common/scripts/ScreenShot.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/ScreenShot.sh

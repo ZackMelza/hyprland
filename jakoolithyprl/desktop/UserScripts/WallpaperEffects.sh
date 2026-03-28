@@ -1,1 +1,1 @@
-../../common/UserScripts/WallpaperEffects.sh
+/home/zack/projects/scripts/jakoolithyprl/common/UserScripts/WallpaperEffects.sh

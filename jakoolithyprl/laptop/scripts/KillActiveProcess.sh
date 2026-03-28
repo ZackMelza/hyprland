@@ -1,1 +1,1 @@
-../../common/scripts/KillActiveProcess.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/KillActiveProcess.sh

@@ -1,1 +1,1 @@
-../../common/scripts/MonitorProfiles.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/MonitorProfiles.sh

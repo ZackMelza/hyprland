@@ -1,1 +1,1 @@
-../../common/scripts/RefreshNoWaybar.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/RefreshNoWaybar.sh

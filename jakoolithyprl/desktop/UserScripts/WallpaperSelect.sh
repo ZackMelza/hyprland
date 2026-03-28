@@ -1,1 +1,1 @@
-../../common/UserScripts/WallpaperSelect.sh
+/home/zack/projects/scripts/jakoolithyprl/common/UserScripts/WallpaperSelect.sh

@@ -1,1 +1,1 @@
-../../common/scripts/LockScreen.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/LockScreen.sh

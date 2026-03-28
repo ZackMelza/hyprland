@@ -1,1 +1,1 @@
-../../common/scripts/PortalHyprland.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/PortalHyprland.sh

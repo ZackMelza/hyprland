@@ -1,1 +1,1 @@
-../../common/scripts/update_WindowRules.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/update_WindowRules.sh

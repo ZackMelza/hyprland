@@ -1,1 +1,1 @@
-../../common/UserScripts/Weather.py
+/home/zack/projects/scripts/jakoolithyprl/common/UserScripts/Weather.py

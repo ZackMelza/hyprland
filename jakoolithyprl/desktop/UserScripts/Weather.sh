@@ -1,1 +1,1 @@
-../../common/UserScripts/Weather.sh
+/home/zack/projects/scripts/jakoolithyprl/common/UserScripts/Weather.sh

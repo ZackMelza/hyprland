@@ -1,1 +1,1 @@
-../../common/scripts/Hyprsunset.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/Hyprsunset.sh

@@ -1,1 +1,1 @@
-../../common/UserScripts/WeatherWrap.sh
+/home/zack/projects/scripts/jakoolithyprl/common/UserScripts/WeatherWrap.sh

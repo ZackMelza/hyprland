@@ -1,1 +1,1 @@
-../../common/scripts/ClipManager.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/ClipManager.sh

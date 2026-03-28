@@ -1,1 +1,1 @@
-../../common/scripts/Polkit.sh
+/home/zack/projects/scripts/jakoolithyprl/common/scripts/Polkit.sh
