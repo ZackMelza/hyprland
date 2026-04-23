@@ -133,7 +133,7 @@ build_active_tree() {
     hyprlock-2k.conf \
     hyprlock.conf \
     initial-boot.sh \
-    v2.3.17
+    v2.3.20
   do
     source_path="$repo_root/common/$rel"
     target_path="$active_dir/$rel"

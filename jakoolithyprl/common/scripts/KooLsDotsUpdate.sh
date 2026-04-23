@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
 # simple bash script to check if update is available by comparing local version and github version
 
@@ -10,7 +10,7 @@ KooL_Dots_DIR="$HOME/Hyprland-Dots"
 
 # exit if cannot find local version
 if [ -z "$local_version" ]; then
-  notify-send -i "$iDIR/error.png" "ERROR "!?!?!!"" "Unable to find KooL's dots version . exiting.... "
+  notify-send -i "$iDIR/error.png" "ERROR" "Unable to find KooL's dots version. Exiting."
   exit 1
 fi
 
