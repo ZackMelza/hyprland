@@ -9,8 +9,6 @@
 
 wallust_refresh=$HOME/.config/hypr/scripts/RefreshNoWaybar.sh
 
-focused_monitor=$(hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}')
-
 if command -v swww >/dev/null 2>&1; then
 	wallpaper_cmd="swww"
 	wallpaper_daemon="swww-daemon"
@@ -28,12 +26,33 @@ if [[ $# -lt 1 ]] || [[ ! -d $1   ]]; then
 	exit 1
 fi
 
+wall_dir="$1"
+
 # Edit below to control the images transition
 export SWWW_TRANSITION_FPS=60
 export SWWW_TRANSITION_TYPE=simple
+export AWWW_TRANSITION_FPS=60
+export AWWW_TRANSITION=simple
 
 # This controls (in seconds) when to switch to the next image
 INTERVAL=1800
+
+get_focused_monitor() {
+	hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}'
+}
+
+set_wallpaper() {
+	local img="$1"
+	local focused_monitor
+
+	[[ -f "$img" ]] || return 1
+
+	focused_monitor="$(get_focused_monitor)"
+	[[ -n "$focused_monitor" ]] || return 1
+
+	"$wallpaper_cmd" img -o "$focused_monitor" "$img" || return 1
+	"$wallust_refresh" "$img"
+}
 
 if ! "$wallpaper_cmd" query >/dev/null 2>&1; then
 	if [[ "$wallpaper_daemon" == "swww-daemon" ]]; then
@@ -45,7 +64,7 @@ if ! "$wallpaper_cmd" query >/dev/null 2>&1; then
 fi
 
 while true; do
-	find "$1" -type f \( \
+	find "$wall_dir" -type f \( \
 		-iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o \
 		-iname "*.bmp" -o -iname "*.tiff" -o -iname "*.webp" -o -iname "*.pnm" -o \
 		-iname "*.tga" -o -iname "*.farbfeld" \) \
@@ -54,11 +73,7 @@ while true; do
 		done \
 		| sort -n | cut -d':' -f2- \
 		| while read -r img; do
-			"$wallpaper_cmd" img -o $focused_monitor "$img"
-			# Regenerate colors from the exact image path to avoid cache races
-			$HOME/.config/hypr/scripts/WallustSwww.sh "$img"
-			# Refresh UI components that depend on wallust output
-			$wallust_refresh
+			set_wallpaper "$img"
 			sleep $INTERVAL
 			
 		done

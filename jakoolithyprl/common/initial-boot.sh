@@ -17,18 +17,34 @@ gtk_theme="Flat-Remix-GTK-Blue-Dark"
 icon_theme="Flat-Remix-Blue-Dark"
 cursor_theme="Bibata-Modern-Ice"
 
-swww="swww img"
+if command -v swww >/dev/null 2>&1; then
+	wallpaper_cmd="swww"
+	wallpaper_daemon="swww-daemon"
+elif command -v awww >/dev/null 2>&1; then
+	wallpaper_cmd="awww"
+	wallpaper_daemon="awww-daemon"
+fi
 effect="--transition-bezier .43,1.19,1,.4 --transition-fps 30 --transition-type grow --transition-pos 0.925,0.977 --transition-duration 2"
 
 # Check if a marker file exists.
 if [ ! -f "$HOME/.config/hypr/.initial_startup_done" ]; then
     sleep 1
     # Initialize wallust and wallpaper
-	if [ -f "$wallpaper" ]; then
-		wallust run -s $wallpaper > /dev/null 
-		swww query || swww-daemon && $swww $wallpaper $effect
-	    "$scriptsDir/WallustSwww.sh" > /dev/null 2>&1 & 
-	fi
+		if [ -f "$wallpaper" ]; then
+			wallust run -s "$wallpaper" > /dev/null
+			if [ -n "${wallpaper_cmd:-}" ]; then
+				if ! "$wallpaper_cmd" query >/dev/null 2>&1; then
+					if [ "$wallpaper_daemon" = "swww-daemon" ]; then
+						swww-daemon --format xrgb >/dev/null 2>&1 &
+					else
+						awww-daemon >/dev/null 2>&1 &
+					fi
+					sleep 0.5
+				fi
+				"$wallpaper_cmd" img "$wallpaper" $effect
+			fi
+		    "$scriptsDir/WallustSwww.sh" "$wallpaper" > /dev/null 2>&1 & 
+		fi
      
     # initiate GTK dark mode and apply icon and cursor theme
     gsettings set org.gnome.desktop.interface color-scheme $color_scheme > /dev/null 2>&1 &

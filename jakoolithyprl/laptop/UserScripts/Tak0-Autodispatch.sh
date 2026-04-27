@@ -1,1 +1,0 @@
-/home/zack/projects/scripts/jakoolithyprl/common/UserScripts/Tak0-Autodispatch.sh

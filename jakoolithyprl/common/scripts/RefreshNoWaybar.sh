@@ -7,6 +7,7 @@
 
 SCRIPTSDIR=$HOME/.config/hypr/scripts
 UserScripts=$HOME/.config/hypr/UserScripts
+wallpaper_path="${1:-}"
 
 # Define file_exists function
 file_exists() {
@@ -32,7 +33,7 @@ done
 #pkill qs && qs &
 
 # Wallust refresh (synchronous to ensure colors are ready)
-${SCRIPTSDIR}/WallustSwww.sh
+WALLUST_RELOAD_WAYBAR=0 "${SCRIPTSDIR}/WallustSwww.sh" "$wallpaper_path"
 sleep 0.2
 
 # reload swaync

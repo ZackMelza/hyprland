@@ -7,19 +7,29 @@ set -euo pipefail
 
 # Inputs and paths
 passed_path="${1:-}"
-cache_dir="$HOME/.cache/swww/"
+if command -v swww >/dev/null 2>&1; then
+  wallpaper_cmd="swww"
+  cache_dir="$HOME/.cache/swww"
+elif command -v awww >/dev/null 2>&1; then
+  wallpaper_cmd="awww"
+  cache_dir="$HOME/.cache/awww"
+else
+  wallpaper_cmd=""
+  cache_dir=""
+fi
 rofi_link="$HOME/.config/rofi/.current_wallpaper"
 wallpaper_current="$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
 read_cached_wallpaper() {
   local cache_file="$1"
   if [[ -f "$cache_file" ]]; then
-    awk 'NF && $0 !~ /^filter/ {print; exit}' "$cache_file"
+    tr '\0' '\n' < "$cache_file" | awk 'NF && $0 !~ /^filter/ && ($0 ~ /^\// || $0 ~ /^~/) {print; exit}'
   fi
 }
 
 read_wallpaper_from_query() {
   local monitor="$1"
-  swww query | awk -v mon="$monitor" '
+  [[ -n "$wallpaper_cmd" ]] || return 0
+  "$wallpaper_cmd" query | awk -v mon="$monitor" '
     /^Monitor/ {
       cur=$2
       gsub(":", "", cur)
@@ -41,6 +51,21 @@ get_focused_monitor() {
   fi
 }
 
+get_cache_file() {
+  local monitor="$1"
+  local cache_file=""
+
+  [[ -n "$cache_dir" ]] || return 0
+
+  if [[ "$wallpaper_cmd" == "swww" ]]; then
+    cache_file="$cache_dir/$monitor"
+  else
+    cache_file="$(find "$cache_dir" -maxdepth 2 -type f -name "$monitor" -print -quit 2>/dev/null || true)"
+  fi
+
+  printf '%s\n' "$cache_file"
+}
+
 # Determine wallpaper_path
 wallpaper_path=""
 if [[ -n "$passed_path" && -f "$passed_path" ]]; then
@@ -48,17 +73,18 @@ if [[ -n "$passed_path" && -f "$passed_path" ]]; then
 else
   # Try to read from swww cache for the focused monitor, with a short retry loop
   current_monitor="$(get_focused_monitor)"
-  cache_file="$cache_dir$current_monitor"
+  cache_file="$(get_cache_file "$current_monitor")"
 
   # Wait briefly for swww to write its cache after an image change
   for i in {1..10}; do
-    if [[ -f "$cache_file" ]]; then
+    cache_file="$(get_cache_file "$current_monitor")"
+    if [[ -n "$cache_file" && -f "$cache_file" ]]; then
       break
     fi
     sleep 0.1
   done
 
-  if [[ -f "$cache_file" ]]; then
+  if [[ -n "$cache_file" && -f "$cache_file" ]]; then
     # The first non-filter line is the original wallpaper path
     wallpaper_path="$(read_cached_wallpaper "$cache_file")"
   fi
@@ -128,9 +154,12 @@ if pidof ghostty >/dev/null; then
   for pid in $(pidof ghostty); do kill -SIGUSR2 "$pid" 2>/dev/null || true; done
 fi
 
-# Prompt Waybar to reload colors
-if command -v waybar-msg >/dev/null 2>&1; then
-  waybar-msg cmd reload >/dev/null 2>&1 || true
-elif pidof waybar >/dev/null; then
-  killall -SIGUSR2 waybar 2>/dev/null || true
+# Prompt Waybar to reload colors unless the caller is intentionally using the
+# no-Waybar refresh path, such as automatic wallpaper rotation.
+if [[ "${WALLUST_RELOAD_WAYBAR:-1}" != "0" ]]; then
+  if command -v waybar-msg >/dev/null 2>&1; then
+    waybar-msg cmd reload >/dev/null 2>&1 || true
+  elif pidof waybar >/dev/null; then
+    killall -SIGUSR2 waybar 2>/dev/null || true
+  fi
 fi

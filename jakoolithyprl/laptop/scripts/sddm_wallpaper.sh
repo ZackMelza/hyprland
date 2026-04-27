@@ -1,1 +1,0 @@
-/home/zack/projects/scripts/jakoolithyprl/common/scripts/sddm_wallpaper.sh

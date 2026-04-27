@@ -26,11 +26,27 @@ for pid in waybar rofi swaync ags swaybg; do
 done
 
 
-# Initialize swww if needed
-swww query || swww-daemon --format xrgb
+# Initialize wallpaper backend if needed
+if command -v swww >/dev/null 2>&1; then
+    wallpaper_cmd="swww"
+    wallpaper_daemon="swww-daemon"
+elif command -v awww >/dev/null 2>&1; then
+    wallpaper_cmd="awww"
+    wallpaper_daemon="awww-daemon"
+else
+    echo "No supported wallpaper backend found (need swww or awww)." >&2
+    exit 1
+fi
 
-# Set swww options
-swww="swww img"
+if ! "$wallpaper_cmd" query >/dev/null 2>&1; then
+    if [[ "$wallpaper_daemon" == "swww-daemon" ]]; then
+        swww-daemon --format xrgb >/dev/null 2>&1 &
+    else
+        awww-daemon >/dev/null 2>&1 &
+    fi
+    sleep 0.5
+fi
+
 effect="--transition-bezier .43,1.19,1,.4 --transition-fps 60 --transition-type grow --transition-pos 0.925,0.977 --transition-duration 2"
 
 # Determine current theme mode
@@ -126,8 +142,8 @@ else
     next_wallpaper="$(find -L "${light_wallpapers}" -type f \( -iname "*.jpg" -o -iname "*.png" \) -print0 | shuf -n1 -z | xargs -0)"
 fi
 
-# Update wallpaper using swww command
-$swww "${next_wallpaper}" $effect
+# Update wallpaper using the active wallpaper backend
+"$wallpaper_cmd" img "${next_wallpaper}" $effect
 
 
 # Set Kvantum Manager theme & QT5/QT6 settings
@@ -239,7 +255,7 @@ set_custom_gtk_theme "$next_mode"
 update_theme_mode
 
 
-${SCRIPTSDIR}/WallustSwww.sh &&
+${SCRIPTSDIR}/WallustSwww.sh "$next_wallpaper" &&
 
 sleep 2
 # kill process

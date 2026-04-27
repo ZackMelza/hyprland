@@ -21,6 +21,15 @@ DURATION=2
 BEZIER=".43,1.19,1,.4"
 SWWW_PARAMS="--transition-fps $FPS --transition-type $TYPE --transition-duration $DURATION --transition-bezier $BEZIER"
 
+if command -v swww >/dev/null 2>&1; then
+    wallpaper_cmd="swww"
+elif command -v awww >/dev/null 2>&1; then
+    wallpaper_cmd="awww"
+else
+    notify-send -i "$iDIR/error.png" "E-R-R-O-R" "No supported wallpaper backend found"
+    exit 1
+fi
+
 # Define ImageMagick effects
 declare -A effects=(
     ["No Effects"]="no-effects"
@@ -45,7 +54,7 @@ declare -A effects=(
 
 # Function to apply no effects
 no-effects() {
-    swww img -o "$focused_monitor" "$wallpaper_current" $SWWW_PARAMS &&
+    "$wallpaper_cmd" img -o "$focused_monitor" "$wallpaper_current" $SWWW_PARAMS &&
     wait $!
     wallust run "$wallpaper_current" -s &&
     wait $!
@@ -83,7 +92,7 @@ main() {
             done
 
             sleep 1
-            swww img -o "$focused_monitor" "$wallpaper_output" $SWWW_PARAMS &
+            "$wallpaper_cmd" img -o "$focused_monitor" "$wallpaper_output" $SWWW_PARAMS &
 
             sleep 2
   

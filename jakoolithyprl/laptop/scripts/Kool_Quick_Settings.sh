@@ -1,1 +1,0 @@
-/home/zack/projects/scripts/jakoolithyprl/common/scripts/Kool_Quick_Settings.sh

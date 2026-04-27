@@ -16,10 +16,28 @@ else
   exit 1
 fi
 
-focused_monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')
+get_focused_monitor() {
+  if command -v jq >/dev/null 2>&1; then
+    hyprctl monitors -j | jq -r '.[] | select(.focused) | .name'
+  else
+    hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}'
+  fi
+}
 
-PICS=($(find -L ${wallDIR} -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.pnm" -o -name "*.tga" -o -name "*.tiff" -o -name "*.webp" -o -name "*.bmp" -o -name "*.farbfeld" -o -name "*.gif" \)))
-RANDOMPICS=${PICS[ $RANDOM % ${#PICS[@]} ]}
+focused_monitor="$(get_focused_monitor)"
+if [[ -z "$focused_monitor" ]]; then
+  echo "Could not determine focused monitor" >&2
+  exit 1
+fi
+
+mapfile -d '' PICS < <(find -L "$wallDIR" -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.pnm" -o -name "*.tga" -o -name "*.tiff" -o -name "*.webp" -o -name "*.bmp" -o -name "*.farbfeld" -o -name "*.gif" \) -print0)
+
+if [[ ${#PICS[@]} -eq 0 ]]; then
+  echo "No wallpapers found in $wallDIR" >&2
+  exit 1
+fi
+
+RANDOMPICS="${PICS[RANDOM % ${#PICS[@]}]}"
 
 
 # Transition config
@@ -32,17 +50,16 @@ SWWW_PARAMS="--transition-fps $FPS --transition-type $TYPE --transition-duration
 
 if ! "$wallpaper_cmd" query >/dev/null 2>&1; then
   if [[ "$wallpaper_daemon" == "swww-daemon" ]]; then
-    swww-daemon --format xrgb
+    swww-daemon --format xrgb >/dev/null 2>&1 &
   else
-    awww-daemon
+    awww-daemon >/dev/null 2>&1 &
   fi
+  sleep 0.5
 fi
 
-"$wallpaper_cmd" img -o $focused_monitor ${RANDOMPICS} $SWWW_PARAMS
+"$wallpaper_cmd" img -o "$focused_monitor" "${RANDOMPICS}" $SWWW_PARAMS
 
-wait $!
 "$SCRIPTSDIR/WallustSwww.sh" "${RANDOMPICS}" &&
 
-wait $!
 sleep 2
 "$SCRIPTSDIR/Refresh.sh"

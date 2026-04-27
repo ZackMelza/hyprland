@@ -1,1 +1,0 @@
-/home/zack/projects/scripts/jakoolithyprl/common/scripts/RofiSearch.sh
