@@ -212,14 +212,14 @@ mkdir -p "$env_dir"
 if [[ -f "$env_file" && $force -ne 1 ]]; then
   if grep -qxF "$new_line" "$env_file"; then
     echo "HYPR_PROFILE already set to '$profile' in $env_file"
-    exit 0
+  else
+    echo "Refusing to overwrite $env_file without --force" >&2
+    exit 1
   fi
-  echo "Refusing to overwrite $env_file without --force" >&2
-  exit 1
+else
+  printf '%s\n' "$new_line" > "$env_file"
+  echo "Set HYPR_PROFILE=$profile in $env_file"
 fi
-
-printf '%s\n' "$new_line" > "$env_file"
-echo "Set HYPR_PROFILE=$profile in $env_file"
 
 if [[ ! -d "$profile_dir/UserConfigs" ]]; then
   echo "UserConfigs directory not found: $profile_dir/UserConfigs" >&2
