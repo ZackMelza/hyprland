@@ -1,136 +1,408 @@
 #!/usr/bin/env bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# RofiBeats - unified, dynamic UI (add, remove, manage, play)
+# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+# Player-style Rofi music launcher for local files + YouTube.
 
-mDIR="$HOME/Music/"
+set -u
+
+mDIR="$HOME/Music"
 iDIR="$HOME/.config/swaync/icons"
 rofi_theme="$HOME/.config/rofi/config-rofi-Beats.rasi"
 rofi_theme_menu="$HOME/.config/rofi/config-rofi-Beats-menu.rasi"
-music_list="$HOME/.config/rofi/online_music.list"
+MPV_SOCKET="${XDG_RUNTIME_DIR:-/tmp}/rofibeats-mpv.sock"
+rofi_input_override='window { width: 50%; } listview { lines: 0; }'
 
-mkdir -p "$(dirname "$music_list")"
-[[ -f "$music_list" ]] || touch "$music_list"
+# Preset YouTube links (edit freely)
+declare -A online_music=(
+  ["lofi hip hop radio 📚 beats to relax/study to"]="https://www.youtube.com/watch?v=jfKfPfyJRdk&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=1"
+  ["synthwave radio 🌌 beats to chill/game to"]="https://www.youtube.com/watch?v=4xDzrJKXOOY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=2"
+  ["jazz lofi radio 🎷 beats to chill/study to"]="https://www.youtube.com/watch?v=HuFYqnbVbzY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=4"
+  ["lofi hip hop radio 💤 beats to sleep/chill to"]="https://www.youtube.com/watch?v=28KRPhVzCus&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=5"
+  ["sleep ambient radio 💤 relaxing music to fall asleep to"]="https://www.youtube.com/watch?v=28KRPhVzCus&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=6"
+  ["Study With Me 📚 Pomodoro"]="https://www.youtube.com/watch?v=1oDrJba2PSs&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=8"
+  ["chill guitar radio 🎸 music to study/relax to"]="https://www.youtube.com/watch?v=E_XmwjgRLz8&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=10"
+  ["bossa lofi radio 🌴 chill music for relaxing days"]="https://www.youtube.com/watch?v=Zq9-4INDsvY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=11"
+  ["peaceful piano radio 🎹 music to focus/study to"]="https://www.youtube.com/watch?v=TtkFsfOP9QI&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=12"
+  ["dark ambient radio 🌃 music to escape/dream to"]="https://www.youtube.com/watch?v=S_MOd40zlYU&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=13"
+  ["sad lofi radio ☔ beats for rainy days"]="https://www.youtube.com/watch?v=P6Segk8cr-c&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=15"
+  ["gentle rain ambience 🌧 cozy sound to chill to"]="https://www.youtube.com/watch?v=-OekvEFm1lo&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=16"
+  ["fireplace ambience 🔥 cozy sound to chill to"]="https://www.youtube.com/watch?v=q_4KI-ChIIs&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=17"
+)
 
-# Send notification
 notification() {
-  notify-send -u normal -i "$iDIR/music.png" "$@"
+  notify-send -u normal -i "$iDIR/music.png" "RofiBeats" "$*" >/dev/null 2>&1 || true
 }
 
-# Check if mpv is currently playing
-music_playing() { pgrep -x "mpv" >/dev/null; }
+error_notification() {
+  notify-send -u critical -i "$iDIR/music.png" "RofiBeats" "$*" >/dev/null 2>&1 || true
+}
 
-# Stop all mpv processes except mpvpaper
-stop_music() {
-  mpv_pids=$(pgrep -x mpv)
-  if [ -n "$mpv_pids" ]; then
-    mpvpaper_pid=$(ps aux | grep -- 'unique-wallpaper-process' | grep -v 'grep' | awk '{print $2}')
-    for pid in $mpv_pids; do
-      if ! echo "$mpvpaper_pid" | grep -q "$pid"; then
-        kill -9 $pid || true
-      fi
-    done
-    notification "Music stopped"
+rofi_menu() {
+  local prompt="$1"
+  local theme="$2"
+  local override="${3:-$(rofi_dynamic_override 6 40 1 1 8)}"
+  rofi -i -dmenu -p "$prompt" -config "$theme" -theme-str "$override"
+}
+
+rofi_dynamic_override() {
+  local count="$1"
+  local longest="$2"
+  local columns="$3"
+  local min_lines="$4"
+  local max_lines="$5"
+  local lines width
+
+  [ "$count" -lt 1 ] && count=1
+  [ "$columns" -lt 1 ] && columns=1
+
+  lines=$(((count + columns - 1) / columns))
+  [ "$lines" -lt "$min_lines" ] && lines="$min_lines"
+  [ "$lines" -gt "$max_lines" ] && lines="$max_lines"
+
+  if [ "$columns" -gt 1 ]; then
+    width=$((42 + (columns * 14)))
+  else
+    width=42
   fi
+
+  if [ "$longest" -gt 42 ]; then
+    width=$((width + 10))
+  fi
+  if [ "$longest" -gt 72 ]; then
+    width=$((width + 14))
+  fi
+
+  [ "$width" -lt 38 ] && width=38
+  [ "$width" -gt 92 ] && width=92
+
+  printf 'window { width: %s%%; } listview { lines: %s; columns: %s; fixed-columns: true; dynamic: true; }' "$width" "$lines" "$columns"
 }
 
-# Populate local music file list
+longest_entry_length() {
+  local max=0 entry
+
+  for entry in "$@"; do
+    if [ "${#entry}" -gt "$max" ]; then
+      max="${#entry}"
+    fi
+  done
+
+  printf '%s' "$max"
+}
+
+rofi_array_menu() {
+  local prompt="$1"
+  local theme="$2"
+  local columns="$3"
+  local min_lines="$4"
+  local max_lines="$5"
+  shift 5
+
+  local override
+  override="$(rofi_dynamic_override "$#" "$(longest_entry_length "$@")" "$columns" "$min_lines" "$max_lines")"
+  printf "%s\n" "$@" | rofi_menu "$prompt" "$theme" "$override"
+}
+
+rofi_input() {
+  local prompt="$1"
+  local theme="$2"
+  printf "" | rofi -dmenu -p "$prompt" -config "$theme" -theme-str "$rofi_input_override"
+}
+
+music_playing() {
+  pgrep -x mpv >/dev/null
+}
+
+# Avoid killing mpvpaper mpv process if present.
+stop_music() {
+  local mpv_pids mpvpaper_pid
+  mpv_pids="$(pgrep -x mpv || true)"
+
+  [ -z "$mpv_pids" ] && return 0
+
+  mpvpaper_pid="$(ps aux | grep -- 'unique-wallpaper-process' | grep -v 'grep' | awk '{print $2}' || true)"
+
+  for pid in $mpv_pids; do
+    if ! echo "$mpvpaper_pid" | grep -q "$pid"; then
+      kill "$pid" >/dev/null 2>&1 || true
+    fi
+  done
+
+  rm -f "$MPV_SOCKET" >/dev/null 2>&1 || true
+  notify-send -u low -i "$iDIR/music.png" "Music stopped" >/dev/null 2>&1 || true
+}
+
+start_mpv() {
+  local desc="$1"
+  shift
+
+  stop_music
+  rm -f "$MPV_SOCKET" >/dev/null 2>&1 || true
+
+  # Launch detached so rofi can exit immediately.
+  nohup mpv \
+    --vid=no \
+    --force-window=no \
+    --input-ipc-server="$MPV_SOCKET" \
+    "$@" >/dev/null 2>&1 &
+
+  notification "Now playing: $desc"
+}
+
+mpv_ipc() {
+  local payload="$1"
+
+  if [ ! -S "$MPV_SOCKET" ]; then
+    error_notification "No active player session"
+    return 1
+  fi
+
+  if command -v socat >/dev/null 2>&1; then
+    printf '%s\n' "$payload" | socat - "$MPV_SOCKET" >/dev/null 2>&1 || true
+  elif command -v nc >/dev/null 2>&1; then
+    printf '%s\n' "$payload" | nc -U "$MPV_SOCKET" >/dev/null 2>&1 || true
+  elif command -v python3 >/dev/null 2>&1; then
+    MPV_SOCKET_PATH="$MPV_SOCKET" MPV_IPC_PAYLOAD="$payload" python3 - <<'PY' >/dev/null 2>&1 || true
+import os
+import socket
+
+sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+sock.connect(os.environ["MPV_SOCKET_PATH"])
+sock.sendall((os.environ["MPV_IPC_PAYLOAD"] + "\n").encode())
+sock.close()
+PY
+  else
+    error_notification "Install socat, nc, or python3 for playback controls"
+    return 1
+  fi
+
+  return 0
+}
+
 populate_local_music() {
   local_music=()
-  filenames=()
+  display_names=()
+
   while IFS= read -r file; do
     local_music+=("$file")
-    filenames+=("$(basename "$file")")
-  done < <(find -L "$mDIR" -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.mp4" \))
+    display_names+=("${file#"$mDIR"/}")
+  done < <(find -L "$mDIR" -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.m4a" -o -iname "*.mp4" \) | sort)
 }
 
-# Play selected local music file
 play_local_music() {
+  if [ ! -d "$mDIR" ]; then
+    error_notification "Music directory not found: $mDIR"
+    return
+  fi
+
   populate_local_music
-  choice=$(printf "%s\n" "${filenames[@]}" | rofi -i -dmenu -config "$rofi_theme" \
-    -theme-str 'entry { placeholder: "🎵 Choose Local Music"; }')
-  [[ -z "$choice" ]] && exit 1
-  for ((i = 0; i < "${#filenames[@]}"; ++i)); do
-    if [ "${filenames[$i]}" = "$choice" ]; then
-      music_playing && stop_music
-      notification "Now Playing:" "$choice"
-      mpv --no-video --playlist-start="$i" --loop-playlist "${local_music[@]}"
-      break
+  if [ "${#local_music[@]}" -eq 0 ]; then
+    error_notification "No local audio files found in $mDIR"
+    return
+  fi
+
+  local choice i
+  choice="$(rofi_array_menu "Local Music" "$rofi_theme" 1 4 12 "${display_names[@]}")"
+  [ -z "$choice" ] && return
+
+  for ((i = 0; i < ${#display_names[@]}; i++)); do
+    if [ "${display_names[$i]}" = "$choice" ]; then
+      start_mpv "$choice" --playlist-start="$i" --loop-playlist "${local_music[@]}"
+      return
     fi
   done
 }
 
-# Shuffle and play all local music
 shuffle_local_music() {
-  music_playing && stop_music
-  notification "Shuffle Play local music"
-  mpv --no-video --shuffle --loop-playlist "$mDIR"
-}
-
-# Play selected online music
-play_online_music() {
-  if [ ! -s "$music_list" ]; then
-    notify-send -u low -i "$iDIR/music.png" "No online music found" "Add some with Manage Music"
-    exit 0
+  if [ ! -d "$mDIR" ]; then
+    error_notification "Music directory not found: $mDIR"
+    return
   fi
-  choice=$(awk -F'|' '{print $1}' "$music_list" | sort | rofi -i -dmenu -config "$rofi_theme" \
-    -theme-str 'entry { placeholder: "🌐 Choose Online Station"; }')
-  [[ -z "$choice" ]] && exit 1
-  link=$(awk -F'|' -v name="$choice" '$1 == name {print $2; exit}' "$music_list")
-  [[ -z "$link" ]] && {
-    notify-send -u low -i "$iDIR/music.png" "URL not found for" "$choice"
-    exit 1
-  }
-  music_playing && stop_music
-  notification "Now Playing:" "$choice"
-  mpv --no-video --shuffle "$link"
+
+  start_mpv "Local shuffle" --shuffle --loop-playlist "$mDIR"
 }
 
-# Manage online music list (add, remove, view)
-manage_music() {
-  sub_choice=$(printf "Add Music\nRemove Music\nView List" | rofi -dmenu \
-    -config "$rofi_theme_menu" \
-    -theme-str 'entry { placeholder: "🛠️ Manage Music List"; }')
+play_preset_online() {
+  local choice link
+  local -a preset_names
+  mapfile -t preset_names < <(for name in "${!online_music[@]}"; do printf "%s\n" "$name"; done | sort)
+  choice="$(rofi_array_menu "YouTube Presets" "$rofi_theme" 1 4 12 "${preset_names[@]}")"
+  [ -z "$choice" ] && return
 
-  case "$sub_choice" in
-  "Add Music")
-    name=$(rofi -dmenu -lines 0 -config "$rofi_theme_menu" \
-      -theme-str 'entry { placeholder: "🎼 Enter Music Title"; }')
-    [[ -z "$name" ]] && return
-    url=$(rofi -dmenu -lines 0 -config "$rofi_theme_menu" \
-      -theme-str 'entry { placeholder: "🔗 Enter Music URL"; }')
-    [[ -z "$url" ]] && return
-    echo "$name|$url" >>"$music_list"
-    notification "Added" "$name"
-    ;;
-  "Remove Music")
-    entry=$(awk -F'|' '{print $1}' "$music_list" | rofi -dmenu -config "$rofi_theme_menu" \
-      -theme-str 'entry { placeholder: "🗑️ Select Music to Remove"; }')
-    [[ -z "$entry" ]] && return
-    grep -vF "$entry" "$music_list" >"$music_list.tmp" && mv "$music_list.tmp" "$music_list"
-    notification "Removed" "$entry"
-    ;;
-  "View List")
-    # Show only titles, not URLs
-    awk -F'|' '{print $1}' "$music_list" | rofi -dmenu -config "$rofi_theme_menu" \
-      -theme-str 'entry { placeholder: "📜 Online Music List"; }' >/dev/null
-    ;;
+  link="${online_music[$choice]}"
+  start_mpv "$choice" "$link"
+}
+
+play_direct_url() {
+  local link
+  link="$(rofi_input "Paste URL" "$rofi_theme")"
+  [ -z "$link" ] && return
+
+  start_mpv "$link" "$link"
+}
+
+search_youtube() {
+  local query selection
+  query="$(rofi_input "YouTube Search" "$rofi_theme")"
+  [ -z "$query" ] && return
+
+  if command -v yt-dlp >/dev/null 2>&1; then
+    local results=() urls=() video_id title duration_str live_status channel uploader meta idx picked_index
+    local delim=$'\x1f'
+
+    # Method 1: flat search (fast).
+    while IFS="$delim" read -r video_id title duration_str live_status channel uploader; do
+      [ -z "${video_id:-}" ] && continue
+      [ -z "${title:-}" ] && continue
+      if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+        channel="${uploader:-Unknown Channel}"
+      fi
+      if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+        channel="Unknown Channel"
+      fi
+      if [ "${live_status:-}" = "is_live" ]; then
+        meta="[LIVE]"
+      elif [ -n "${duration_str:-}" ] && [ "${duration_str:-}" != "NA" ]; then
+        meta="[$duration_str]"
+      else
+        meta="[--:--]"
+      fi
+      idx=$(( ${#results[@]} + 1 ))
+      results+=("[$idx] $title  -  $channel  $meta")
+      urls+=("https://www.youtube.com/watch?v=$video_id")
+    done < <(yt-dlp --no-warnings --flat-playlist --print "%(id)s${delim}%(title)s${delim}%(duration_string|NA)s${delim}%(live_status|NA)s${delim}%(channel|NA)s${delim}%(uploader|NA)s" "ytsearch12:${query}" 2>/dev/null)
+
+    # Method 2: non-flat search fallback for yt-dlp variants where flat output is empty.
+    if [ "${#results[@]}" -eq 0 ]; then
+      while IFS="$delim" read -r video_id title duration_str live_status channel uploader; do
+        [ -z "${video_id:-}" ] && continue
+        [ -z "${title:-}" ] && continue
+        if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+          channel="${uploader:-Unknown Channel}"
+        fi
+        if [ -z "${channel:-}" ] || [ "${channel:-}" = "NA" ]; then
+          channel="Unknown Channel"
+        fi
+        if [ "${live_status:-}" = "is_live" ]; then
+          meta="[LIVE]"
+        elif [ -n "${duration_str:-}" ] && [ "${duration_str:-}" != "NA" ]; then
+          meta="[$duration_str]"
+        else
+          meta="[--:--]"
+        fi
+        idx=$(( ${#results[@]} + 1 ))
+        results+=("[$idx] $title  -  $channel  $meta")
+        urls+=("https://www.youtube.com/watch?v=$video_id")
+      done < <(yt-dlp --no-warnings --print "%(id)s${delim}%(title)s${delim}%(duration_string|NA)s${delim}%(live_status|NA)s${delim}%(channel|NA)s${delim}%(uploader|NA)s" "ytsearch12:${query}" 2>/dev/null)
+    fi
+
+    if [ "${#results[@]}" -eq 0 ]; then
+      # Final fallback: let mpv/ytdl resolve the query directly.
+      start_mpv "$query" "ytdl://ytsearch1:${query}"
+      return
+    fi
+
+    selection="$(rofi_array_menu "Select Result" "$rofi_theme" 1 5 12 "${results[@]}")"
+    [ -z "$selection" ] && return
+
+    picked_index="${selection#\[}"
+    picked_index="${picked_index%%]*}"
+    if [[ "$picked_index" =~ ^[0-9]+$ ]] && [ "$picked_index" -ge 1 ] && [ "$picked_index" -le "${#urls[@]}" ]; then
+      start_mpv "$selection" "${urls[$((picked_index - 1))]}"
+      return
+    fi
+    error_notification "Could not parse selected result"
+  else
+    # Fallback: mpv + ytdl hook search syntax.
+    start_mpv "$query" "ytdl://ytsearch1:${query}"
+  fi
+}
+
+player_controls_menu() {
+  local action
+  local actions=(
+    "Pause/Resume"
+    "Next"
+    "Previous"
+    "Seek +10s"
+    "Seek -10s"
+    "Volume +5"
+    "Volume -5"
+    "Mute/Unmute"
+    "Stop"
+  )
+  action="$(rofi_array_menu "Player Controls" "$rofi_theme_menu" 2 3 6 "${actions[@]}")"
+
+  case "$action" in
+    "Pause/Resume")
+      mpv_ipc '{"command": ["cycle", "pause"]}' && notification "Toggled pause"
+      ;;
+    "Next")
+      mpv_ipc '{"command": ["playlist-next", "force"]}' && notification "Next track"
+      ;;
+    "Previous")
+      mpv_ipc '{"command": ["playlist-prev", "force"]}' && notification "Previous track"
+      ;;
+    "Seek +10s")
+      mpv_ipc '{"command": ["seek", 10, "relative"]}' && notification "Seeked +10s"
+      ;;
+    "Seek -10s")
+      mpv_ipc '{"command": ["seek", -10, "relative"]}' && notification "Seeked -10s"
+      ;;
+    "Volume +5")
+      mpv_ipc '{"command": ["add", "volume", 5]}' && notification "Volume +5"
+      ;;
+    "Volume -5")
+      mpv_ipc '{"command": ["add", "volume", -5]}' && notification "Volume -5"
+      ;;
+    "Mute/Unmute")
+      mpv_ipc '{"command": ["cycle", "mute"]}' && notification "Toggled mute"
+      ;;
+    "Stop")
+      stop_music
+      ;;
+    *)
+      ;;
   esac
 }
 
-# Main menu
-user_choice=$(printf "%s\n" \
-  "Play from Online Stations" \
-  "Play from Music directory" \
-  "Shuffle Play from Music directory" \
-  "Stop RofiBeats" \
-  "Manage Music List" |
-  rofi -dmenu -config "$rofi_theme_menu" \
-    -theme-str 'entry { placeholder: "🎧 RofiBeats Menu"; }')
+main_menu() {
+  local user_choice
+  local actions=(
+    "YouTube Search"
+    "Play YouTube Presets"
+    "Play From URL"
+    "Play from Music directory"
+    "Shuffle Play from Music directory"
+    "Player Controls"
+    "Stop RofiBeats"
+  )
+  user_choice="$(rofi_array_menu "RofiBeats" "$rofi_theme_menu" 2 3 5 "${actions[@]}")"
 
-case "$user_choice" in
-"Play from Online Stations") play_online_music ;;
-"Play from Music directory") play_local_music ;;
-"Shuffle Play from Music directory") shuffle_local_music ;;
-"Stop RofiBeats") music_playing && stop_music ;;
-"Manage Music List") manage_music ;;
-esac
+  case "$user_choice" in
+    "YouTube Search")
+      search_youtube
+      ;;
+    "Play YouTube Presets")
+      play_preset_online
+      ;;
+    "Play From URL")
+      play_direct_url
+      ;;
+    "Play from Music directory")
+      play_local_music
+      ;;
+    "Shuffle Play from Music directory")
+      shuffle_local_music
+      ;;
+    "Player Controls")
+      player_controls_menu
+      ;;
+    "Stop RofiBeats")
+      stop_music
+      ;;
+    *)
+      ;;
+  esac
+}
+
+main_menu
