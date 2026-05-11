@@ -1,0 +1,58 @@
+# Project Journal
+
+This file is the repo memory for both humans and LLMs. Keep it short, factual,
+and easy to scan before making changes.
+
+## Current Status
+
+- Main focus: managed Hyprland profile setup in `jakoolithyprl/`.
+- Source of truth: `jakoolithyprl/common/` plus small profile overrides.
+- Generated runtime tree: `jakoolithyprl/active/`.
+- Active machine can symlink `~/.config/hypr` to `jakoolithyprl/active/`.
+- Current known Hyprland target: `0.55.x`.
+
+## Done
+
+### 2026-05-11
+
+- Confirmed PlayStation Link USB adapter is recognized after rebooting into the
+  installed kernel version.
+- Confirmed `snd-usb-audio` binds to the adapter and ALSA lists it as
+  `PlayStation Link Adapter`.
+- Fixed Hyprland config errors caused by newer Hyprland syntax:
+  - Changed dwindle split keybind to use `layoutmsg, togglesplit`.
+  - Removed obsolete `dwindle:pseudotile`.
+  - Removed obsolete `misc:vfr`.
+- Reworked `README.md` into a clearer project overview.
+- Added this journal for tasks, completed work, and version notes.
+
+## Open Tasks
+
+- Add a small validation command or script that runs the useful post-edit checks:
+  `hyprctl reload`, `hyprctl configerrors`, and maybe symlink sanity checks.
+- Review remaining JaKooLit config against current Hyprland docs after major
+  Hyprland updates.
+- Decide whether `PROJECT_JOURNAL.md` should grow into a changelog, or whether a
+  separate `CHANGELOG.md` is worth adding later.
+- Document any machine-specific audio routing steps if PlayStation Link needs
+  PipeWire/WirePlumber profile tweaks.
+
+## Version Notes
+
+- Hyprland `0.55.x`: some older JaKooLit config keys and dispatchers are no
+  longer accepted. Prefer checking `hyprctl configerrors` immediately after
+  updates.
+- Arch kernel updates: if modules appear missing after `pacman -Syu`, reboot
+  before debugging hardware drivers. The running kernel must match
+  `/lib/modules/<kernel-version>`.
+
+## LLM Notes
+
+- Do not edit `jakoolithyprl/active/` as the source of truth.
+- Prefer changes in `jakoolithyprl/common/` unless the behavior is genuinely
+  laptop-only or desktop-only.
+- Preserve ignored local state. Do not add generated monitor, workspace,
+  wallpaper, wallust, or initial-startup files unless the ignore rules change
+  intentionally.
+- Before changing setup behavior, inspect `jakoolithyprl/set-hypr-profile.sh`
+  and `.gitignore` together.
