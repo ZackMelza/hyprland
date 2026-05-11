@@ -25,11 +25,11 @@ and easy to scan before making changes.
   - Removed obsolete `misc:vfr`.
 - Reworked `README.md` into a clearer project overview.
 - Added this journal for tasks, completed work, and version notes.
+- Added `jakoolithyprl/check-hypr.sh` for quick profile and Hyprland config
+  sanity checks.
 
 ## Open Tasks
 
-- Add a small validation command or script that runs the useful post-edit checks:
-  `hyprctl reload`, `hyprctl configerrors`, and maybe symlink sanity checks.
 - Review remaining JaKooLit config against current Hyprland docs after major
   Hyprland updates.
 - Decide whether `PROJECT_JOURNAL.md` should grow into a changelog, or whether a

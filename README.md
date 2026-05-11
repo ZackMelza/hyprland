@@ -23,6 +23,9 @@ what should be committed.
 # Reload Hyprland after config edits
 hyprctl reload
 hyprctl configerrors
+
+# Run the repo health check
+./jakoolithyprl/check-hypr.sh
 ```
 
 ## Project Map
@@ -42,6 +45,10 @@ profile differences, such as wallpaper rotation scripts or host templates.
 `jakoolithyprl/active/`
 : Generated working tree built by `set-hypr-profile.sh`. On this machine,
 `~/.config/hypr` can be symlinked here. Do not edit this as the source of truth.
+
+`jakoolithyprl/check-hypr.sh`
+: Health check for the profile setup. It verifies the active profile, symlink,
+generated tree, known obsolete config keys, and `hyprctl configerrors`.
 
 `PROJECT_JOURNAL.md`
 : Human and LLM-friendly project memory: current status, completed changes,
@@ -73,6 +80,7 @@ by git on purpose.
 - Edit laptop/desktop differences only in the matching profile directory.
 - Treat `jakoolithyprl/active/` as generated output.
 - Run `hyprctl reload` and `hyprctl configerrors` after Hyprland config edits.
+- Run `./jakoolithyprl/check-hypr.sh` when the setup feels off.
 - Add noteworthy fixes, migrations, and open tasks to `PROJECT_JOURNAL.md`.
 
 ## Current Notes
