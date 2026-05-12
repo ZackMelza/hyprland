@@ -2,7 +2,9 @@
 set -euo pipefail
 
 target="${1:-$HOME/.config/hypr/hyprland.conf}"
-repo_root_var='$HOME/.config/hypr/..'
+script_path="$(readlink -f -- "${BASH_SOURCE[0]}")"
+script_dir="$(cd -- "$(dirname -- "$script_path")" && pwd)"
+repo_root="$(cd -- "$script_dir/../.." && pwd)"
 expected_source="source = \$RepoRoot/common/hyprland.conf"
 
 repair_config() {
@@ -21,7 +23,7 @@ repair_config() {
 
   cat > "$target_path" <<EOF
 # Local entry point for the generated active profile.
-\$RepoRoot = $repo_root_var
+\$RepoRoot = $repo_root
 $expected_source
 EOF
   chmod 0644 "$target_path"
@@ -42,9 +44,6 @@ repo_root_line="$(grep -E '^\$RepoRoot = ' "$target" | tail -n 1 || true)"
 repo_root_value="${repo_root_line#\$RepoRoot = }"
 
 case "$repo_root_value" in
-  '$HOME/.config/hypr/..')
-    repo_root_ok=1
-    ;;
   /*)
     if [[ -f "$repo_root_value/common/hyprland.conf" ]]; then
       repo_root_ok=1
