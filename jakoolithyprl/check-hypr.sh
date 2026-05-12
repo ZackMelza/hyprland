@@ -93,14 +93,54 @@ check_active_tree() {
   done
 }
 
+check_guard() {
+  local entrypoint="$active_dir/hyprland.conf"
+  local guard_script="$active_dir/scripts/GuardHyprConfig.sh"
+
+  if [[ -x "$guard_script" ]]; then
+    ok "guard script is available"
+  elif [[ -e "$guard_script" ]]; then
+    warn "guard script exists but is not executable: ${guard_script#$repo_root/}"
+  else
+    warn "guard script is missing from active tree; rebuild with set-hypr-profile.sh"
+  fi
+
+  if [[ -L "$entrypoint" ]]; then
+    warn "active/hyprland.conf is still a symlink; rebuild to create the managed wrapper"
+    return
+  fi
+
+  if grep -qxF 'source = $RepoRoot/common/hyprland.conf' "$entrypoint" 2>/dev/null; then
+    ok "active/hyprland.conf uses the managed wrapper"
+  else
+    warn "active/hyprland.conf is not the expected managed wrapper"
+  fi
+}
+
 check_obsolete_config() {
   local matches=""
 
-  matches="$(grep -RnsE '^[[:space:]]*(pseudotile|vfr)[[:space:]]*=' "$repo_root/common" 2>/dev/null || true)"
+  matches="$(grep -RnsE '^[[:space:]]*pseudotile[[:space:]]*=' "$repo_root/common" 2>/dev/null || true)"
   if [[ -z "$matches" ]]; then
-    ok "no known obsolete Hyprland 0.55 keys found in common config"
+    ok "no obsolete pseudotile key found in common config"
   else
-    fail "known obsolete Hyprland keys found in common config"
+    fail "obsolete pseudotile key found in common config"
+    printf '%s\n' "$matches" | print_block
+  fi
+
+  matches="$(
+    find "$repo_root/common" -type f -name '*.conf' -print0 \
+      | xargs -0 awk '
+          /^[[:space:]]*misc[[:space:]]*\{/ { in_misc = 1 }
+          in_misc && /^[[:space:]]*\}/ { in_misc = 0 }
+          in_misc && /^[[:space:]]*vfr[[:space:]]*=/ { printf "%s:%d:%s\n", FILENAME, FNR, $0 }
+        ' 2>/dev/null \
+      || true
+  )"
+  if [[ -z "$matches" ]]; then
+    ok "no obsolete misc:vfr key found in common config"
+  else
+    fail "obsolete misc:vfr key found in common config"
     printf '%s\n' "$matches" | print_block
   fi
 
@@ -148,6 +188,7 @@ main() {
   check_profile
   check_symlink
   check_active_tree
+  check_guard
   check_obsolete_config
   check_hyprctl
 

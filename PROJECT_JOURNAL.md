@@ -13,6 +13,15 @@ and easy to scan before making changes.
 
 ## Done
 
+### 2026-05-12
+
+- Merged laptop-side guard work with local README, journal, and health-check
+  changes.
+- Preserved `GuardHyprConfig.sh` and `--install-guard` support from the laptop
+  branch.
+- Extended `check-hypr.sh` to report whether the guard script and managed
+  `active/hyprland.conf` wrapper are in place.
+
 ### 2026-05-11
 
 - Confirmed PlayStation Link USB adapter is recognized after rebooting into the
@@ -36,6 +45,8 @@ and easy to scan before making changes.
   separate `CHANGELOG.md` is worth adding later.
 - Document any machine-specific audio routing steps if PlayStation Link needs
   PipeWire/WirePlumber profile tweaks.
+- Rebuild the local active tree after pulling guard changes:
+  `./jakoolithyprl/set-hypr-profile.sh --symlink --install-guard`.
 
 ## Version Notes
 
@@ -56,3 +67,6 @@ and easy to scan before making changes.
   intentionally.
 - Before changing setup behavior, inspect `jakoolithyprl/set-hypr-profile.sh`
   and `.gitignore` together.
+- After guard-related changes, run `./jakoolithyprl/check-hypr.sh`; a warning
+  about `active/hyprland.conf` being a symlink means the active tree needs a
+  rebuild with `set-hypr-profile.sh`.
