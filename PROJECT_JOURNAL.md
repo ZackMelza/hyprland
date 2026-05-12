@@ -21,6 +21,18 @@ and easy to scan before making changes.
   branch.
 - Extended `check-hypr.sh` to report whether the guard script and managed
   `active/hyprland.conf` wrapper are in place.
+- Fixed desktop login loop after guard/profile setup. Root cause: old generated
+  `active/hyprland.conf` could still be a symlink to `common/hyprland.conf`;
+  writing the generated wrapper followed the symlink and corrupted the shared
+  config. `set-hypr-profile.sh` now removes stale generated symlinks before
+  writing active files.
+- Made `set-hypr-profile.sh` a one-command setup: auto-detect profile, build
+  `active/`, link `~/.config/hypr`, install the guard, and back up replaced
+  paths.
+- Added generated fallback `wallust/wallust-hyprland.conf` so fresh desktop
+  installs do not fail while sourcing decoration colors before wallust runs.
+- Removed hardcoded checkout path from `profiles/laptop.conf`; generated
+  wrappers now provide `$RepoRoot`.
 
 ### 2026-05-11
 
@@ -45,8 +57,8 @@ and easy to scan before making changes.
   separate `CHANGELOG.md` is worth adding later.
 - Document any machine-specific audio routing steps if PlayStation Link needs
   PipeWire/WirePlumber profile tweaks.
-- Rebuild the local active tree after pulling guard changes:
-  `./jakoolithyprl/set-hypr-profile.sh --symlink --install-guard`.
+- After pulling setup changes on another machine, run
+  `./jakoolithyprl/set-hypr-profile.sh`.
 
 ## Version Notes
 
@@ -70,3 +82,5 @@ and easy to scan before making changes.
 - After guard-related changes, run `./jakoolithyprl/check-hypr.sh`; a warning
   about `active/hyprland.conf` being a symlink means the active tree needs a
   rebuild with `set-hypr-profile.sh`.
+- Generated active files must be unlinked before writing them; otherwise a stale
+  symlink can redirect writes into source-controlled `common/` files.
