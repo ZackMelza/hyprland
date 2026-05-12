@@ -1,0 +1,22 @@
+Hyprland profile check
+repo: /home/zack/projects/scripts/jakoolithyprl
+
+ok: HYPR_PROFILE is desktop
+ok: /home/zack/.config/hypr points to /home/zack/projects/scripts/jakoolithyprl/active
+ok: active tree exists
+ok: found active/hyprland.conf
+ok: found active/configs/Keybinds.conf
+ok: found active/UserConfigs/UserSettings.conf
+ok: found active/UserConfigs/Host.conf
+ok: found active/wallust/wallust-hyprland.conf
+ok: guard script is available
+warn: active/hyprland.conf is still a symlink; rebuild to create the managed wrapper
+ok: no obsolete pseudotile key found in common config
+ok: no obsolete misc:vfr key found in common config
+ok: no direct obsolete togglesplit dispatcher found
+fail: hardcoded checkout path found in sourced profile/common config
+  /home/zack/projects/scripts/jakoolithyprl/common/hyprland.conf:2:$RepoRoot = /home/zack/projects/scripts/jakoolithyprl
+warn: hyprctl could not reach the running Hyprland session
+  HYPRLAND_INSTANCE_SIGNATURE not set! (is hyprland running?)
+
+Done: 1 failure(s), 2 warning(s)
