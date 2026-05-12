@@ -64,11 +64,26 @@ done
 
 detect_profile() {
   local chassis=""
+  local chassis_type=""
   if command -v hostnamectl >/dev/null 2>&1; then
     chassis="$(hostnamectl chassis 2>/dev/null || true)"
     case "$chassis" in
       laptop|desktop)
         echo "$chassis"
+        return 0
+        ;;
+    esac
+  fi
+
+  if [[ -r /sys/class/dmi/id/chassis_type ]]; then
+    chassis_type="$(tr -d '[:space:]' </sys/class/dmi/id/chassis_type)"
+    case "$chassis_type" in
+      8|9|10|11|14)
+        echo "laptop"
+        return 0
+        ;;
+      3|4|5|6|7|13|15|16|35|36)
+        echo "desktop"
         return 0
         ;;
     esac
@@ -129,6 +144,32 @@ write_hyprland_entrypoint() {
 # Local entry point for the generated active profile.
 \$RepoRoot = $repo_root
 source = \$RepoRoot/common/hyprland.conf
+EOF
+}
+
+write_wallust_fallback() {
+  local target_path="$1"
+
+  cat > "$target_path" <<'EOF'
+# Generated fallback colors. Wallust may overwrite this file.
+$background = rgb(1e1e2e)
+$foreground = rgb(cdd6f4)
+$color0 = rgb(1e1e2e)
+$color1 = rgb(f38ba8)
+$color2 = rgb(a6e3a1)
+$color3 = rgb(f9e2af)
+$color4 = rgb(89b4fa)
+$color5 = rgb(cba6f7)
+$color6 = rgb(94e2d5)
+$color7 = rgb(bac2de)
+$color8 = rgb(45475a)
+$color9 = rgb(f38ba8)
+$color10 = rgb(a6e3a1)
+$color11 = rgb(f9e2af)
+$color12 = rgb(89b4fa)
+$color13 = rgb(cba6f7)
+$color14 = rgb(94e2d5)
+$color15 = rgb(cdd6f4)
 EOF
 }
 
@@ -243,6 +284,10 @@ build_active_tree() {
 
   if [[ ! -e "$active_dir/wallust/wallust-hyprland.conf" && -f "$profile_dir/wallust/wallust-hyprland.conf" ]]; then
     cp "$profile_dir/wallust/wallust-hyprland.conf" "$active_dir/wallust/wallust-hyprland.conf"
+  fi
+
+  if [[ ! -e "$active_dir/wallust/wallust-hyprland.conf" ]]; then
+    write_wallust_fallback "$active_dir/wallust/wallust-hyprland.conf"
   fi
 }
 

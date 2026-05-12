@@ -83,7 +83,8 @@ check_active_tree() {
     "$active_dir/hyprland.conf" \
     "$active_dir/configs/Keybinds.conf" \
     "$active_dir/UserConfigs/UserSettings.conf" \
-    "$active_dir/UserConfigs/Host.conf"
+    "$active_dir/UserConfigs/Host.conf" \
+    "$active_dir/wallust/wallust-hyprland.conf"
   do
     if [[ -e "$path" ]]; then
       ok "found ${path#$repo_root/}"
@@ -157,6 +158,18 @@ check_obsolete_config() {
   fi
 }
 
+check_portability() {
+  local matches=""
+
+  matches="$(grep -RnsE '/home/[^[:space:]]+/.*/jakoolithyprl|/path/to/this/repo' "$repo_root/profiles" "$repo_root/common" 2>/dev/null || true)"
+  if [[ -z "$matches" ]]; then
+    ok "no hardcoded checkout paths in sourced profile/common config"
+  else
+    fail "hardcoded checkout path found in sourced profile/common config"
+    printf '%s\n' "$matches" | print_block
+  fi
+}
+
 check_hyprctl() {
   local output=""
 
@@ -190,6 +203,7 @@ main() {
   check_active_tree
   check_guard
   check_obsolete_config
+  check_portability
   check_hyprctl
 
   printf '\n'
