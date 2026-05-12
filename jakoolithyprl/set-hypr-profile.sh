@@ -129,6 +129,7 @@ write_host_conf() {
   local host_conf="$1"
 
   mkdir -p "$(dirname "$host_conf")"
+  rm -f "$host_conf"
   cat > "$host_conf" <<EOF
 # Host profile selector (local to this machine).
 # set-hypr-profile.sh rewrites this file to point at the active profile.
@@ -140,6 +141,7 @@ EOF
 write_hyprland_entrypoint() {
   local target_path="$1"
 
+  rm -f "$target_path"
   cat > "$target_path" <<EOF
 # Local entry point for the generated active profile.
 \$RepoRoot = $repo_root
@@ -150,6 +152,7 @@ EOF
 write_wallust_fallback() {
   local target_path="$1"
 
+  rm -f "$target_path"
   cat > "$target_path" <<'EOF'
 # Generated fallback colors. Wallust may overwrite this file.
 $background = rgb(1e1e2e)
