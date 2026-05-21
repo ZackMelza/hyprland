@@ -5,6 +5,33 @@
 iDIR="$HOME/.config/swaync/icons"
 sDIR="$HOME/.config/hypr/scripts"
 
+get_mic_source() {
+    local source
+
+    if ! command -v pactl >/dev/null 2>&1; then
+        return 1
+    fi
+
+    source=$(pactl get-default-source 2>/dev/null || true)
+    if [[ -n "$source" && "$source" != *.monitor ]]; then
+        printf '%s\n' "$source"
+        return 0
+    fi
+
+    pactl list sources short 2>/dev/null | awk '$2 !~ /\.monitor$/ { print $2; exit }'
+}
+
+mic_pamixer() {
+    local source
+
+    source=$(get_mic_source || true)
+    if [[ -n "$source" ]]; then
+        pamixer --source "$source" "$@"
+    else
+        pamixer --default-source "$@"
+    fi
+}
+
 # Get Volume
 get_volume() {
     if [[ "$(pamixer --get-mute)" == "true" ]]; then
@@ -73,17 +100,17 @@ toggle_mute() {
 
 # Toggle Mic
 toggle_mic() {
-	if [ "$(pamixer --default-source --get-mute)" == "false" ]; then
-		pamixer --default-source -m && notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$iDIR/microphone-mute.png" " Microphone:" " Switched OFF"
-	elif [ "$(pamixer --default-source --get-mute)" == "true" ]; then
-		pamixer --default-source -u && notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$iDIR/microphone.png" " Microphone:" " Switched ON"
+	if [ "$(mic_pamixer --get-mute)" == "false" ]; then
+		mic_pamixer -m && notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$iDIR/microphone-mute.png" " Microphone:" " Switched OFF"
+	elif [ "$(mic_pamixer --get-mute)" == "true" ]; then
+		mic_pamixer -u && notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$iDIR/microphone.png" " Microphone:" " Switched ON"
 	fi
 }
 # Get Mic Icon
 get_mic_icon() {
     local muted current
-    muted=$(pamixer --default-source --get-mute)
-    current=$(pamixer --default-source --get-volume)
+    muted=$(mic_pamixer --get-mute)
+    current=$(mic_pamixer --get-volume)
     if [[ "$muted" == "true" || "$current" -eq "0" ]]; then
         echo "$iDIR/microphone-mute.png"
     else
@@ -93,12 +120,12 @@ get_mic_icon() {
 
 # Get Microphone Volume
 get_mic_volume() {
-    if [[ "$(pamixer --default-source --get-mute)" == "true" ]]; then
+    if [[ "$(mic_pamixer --get-mute)" == "true" ]]; then
         echo "Muted"
         return
     fi
 
-    volume=$(pamixer --default-source --get-volume)
+    volume=$(mic_pamixer --get-volume)
     if [[ "$volume" -eq "0" ]]; then
         echo "Muted"
     else
@@ -122,19 +149,19 @@ notify_mic_user() {
 
 # Increase MIC Volume
 inc_mic_volume() {
-    if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
+    if [ "$(mic_pamixer --get-mute)" == "true" ]; then
         toggle_mic
     else
-        pamixer --default-source -i 5 && notify_mic_user
+        mic_pamixer -i 5 && notify_mic_user
     fi
 }
 
 # Decrease MIC Volume
 dec_mic_volume() {
-    if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
+    if [ "$(mic_pamixer --get-mute)" == "true" ]; then
         toggle_mic
     else
-        pamixer --default-source -d 5 && notify_mic_user
+        mic_pamixer -d 5 && notify_mic_user
     fi
 }
 

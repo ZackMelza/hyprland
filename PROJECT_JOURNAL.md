@@ -13,6 +13,13 @@ and easy to scan before making changes.
 
 ## Done
 
+### 2026-05-21
+
+- Fixed mic mute key handling when PipeWire's default source is a monitor
+  source. `Volume.sh` now targets the first real input source for microphone
+  mute/volume controls, so the ThinkPad `platform::micmute` LED follows the
+  actual built-in mic mute state.
+
 ### 2026-05-12
 
 - Merged laptop-side guard work with local README, journal, and health-check
