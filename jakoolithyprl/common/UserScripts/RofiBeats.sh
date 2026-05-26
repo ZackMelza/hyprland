@@ -10,22 +10,56 @@ rofi_theme="$HOME/.config/rofi/config-rofi-Beats.rasi"
 rofi_theme_menu="$HOME/.config/rofi/config-rofi-Beats-menu.rasi"
 MPV_SOCKET="${XDG_RUNTIME_DIR:-/tmp}/rofibeats-mpv.sock"
 rofi_input_override='window { width: 50%; } listview { lines: 0; }'
+startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.conf"
+startup_command='exec-once = $UserScripts/RofiBeats.sh --startup-loop'
 
 # Preset YouTube links (edit freely)
+playlist_id="PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L"
+
+online_music_names=(
+  "lofi hip hop radio 📚 beats to relax/study to"
+  "synthwave radio 🌌 beats to chill/game to"
+  "lofi hip hop radio 💤 beats to sleep/chill to"
+  "jazz lofi radio 🎷 beats to chill/study to"
+  "sleep ambient music 💤 relaxing radio to fall asleep to"
+  "bossa lofi radio 🌴 chill music for relaxing days"
+  "relaxing piano radio 🎹 calm music to focus to"
+  "relaxing jazz music 🌹 cozy radio to study/chill to"
+  "classical music radio 🎻 relaxing songs to read/study to"
+  "chill guitar radio 🎸 music to study/relax to"
+  "dark ambient radio 🌃 music to escape/dream to"
+  "medieval lofi radio 🏰 - beats to scribe manuscripts to"
+  "christmas lofi music🎄cozy radio to get festive to"
+  "Halloween lofi radio  🧟‍♀️ - spooky beats to get chills to"
+  "gentle rain ambience 🌧 cozy sound to chill to"
+  "fireplace ambience 🔥 cozy sound to chill to"
+)
+
 declare -A online_music=(
-  ["lofi hip hop radio 📚 beats to relax/study to"]="https://www.youtube.com/watch?v=jfKfPfyJRdk&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=1"
-  ["synthwave radio 🌌 beats to chill/game to"]="https://www.youtube.com/watch?v=4xDzrJKXOOY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=2"
-  ["jazz lofi radio 🎷 beats to chill/study to"]="https://www.youtube.com/watch?v=HuFYqnbVbzY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=4"
-  ["lofi hip hop radio 💤 beats to sleep/chill to"]="https://www.youtube.com/watch?v=28KRPhVzCus&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=5"
-  ["sleep ambient radio 💤 relaxing music to fall asleep to"]="https://www.youtube.com/watch?v=28KRPhVzCus&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=6"
-  ["Study With Me 📚 Pomodoro"]="https://www.youtube.com/watch?v=1oDrJba2PSs&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=8"
-  ["chill guitar radio 🎸 music to study/relax to"]="https://www.youtube.com/watch?v=E_XmwjgRLz8&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=10"
-  ["bossa lofi radio 🌴 chill music for relaxing days"]="https://www.youtube.com/watch?v=Zq9-4INDsvY&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=11"
-  ["peaceful piano radio 🎹 music to focus/study to"]="https://www.youtube.com/watch?v=TtkFsfOP9QI&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=12"
-  ["dark ambient radio 🌃 music to escape/dream to"]="https://www.youtube.com/watch?v=S_MOd40zlYU&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=13"
-  ["sad lofi radio ☔ beats for rainy days"]="https://www.youtube.com/watch?v=P6Segk8cr-c&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=15"
-  ["gentle rain ambience 🌧 cozy sound to chill to"]="https://www.youtube.com/watch?v=-OekvEFm1lo&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=16"
-  ["fireplace ambience 🔥 cozy sound to chill to"]="https://www.youtube.com/watch?v=q_4KI-ChIIs&list=PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L&index=17"
+  ["lofi hip hop radio 📚 beats to relax/study to"]="https://www.youtube.com/watch?v=EWrX250Zhko&list=$playlist_id&index=1"
+  ["synthwave radio 🌌 beats to chill/game to"]="https://www.youtube.com/watch?v=4xDzrJKXOOY&list=$playlist_id&index=2"
+  ["lofi hip hop radio 💤 beats to sleep/chill to"]="https://www.youtube.com/watch?v=JD-kMIpDfnY&list=$playlist_id&index=3"
+  ["jazz lofi radio 🎷 beats to chill/study to"]="https://www.youtube.com/watch?v=E2vONfzoyRI&list=$playlist_id&index=4"
+  ["sleep ambient music 💤 relaxing radio to fall asleep to"]="https://www.youtube.com/watch?v=xORCbIptqcc&list=$playlist_id&index=5"
+  ["bossa lofi radio 🌴 chill music for relaxing days"]="https://www.youtube.com/watch?v=56llPN9tS88&list=$playlist_id&index=6"
+  ["relaxing piano radio 🎹 calm music to focus to"]="https://www.youtube.com/watch?v=N0snMcR6aaA&list=$playlist_id&index=7"
+  ["relaxing jazz music 🌹 cozy radio to study/chill to"]="https://www.youtube.com/watch?v=A8jDx9TLMQc&list=$playlist_id&index=8"
+  ["classical music radio 🎻 relaxing songs to read/study to"]="https://www.youtube.com/watch?v=jXAEIWcGXwE&list=$playlist_id&index=9"
+  ["chill guitar radio 🎸 music to study/relax to"]="https://www.youtube.com/watch?v=E_XmwjgRLz8&list=$playlist_id&index=10"
+  ["dark ambient radio 🌃 music to escape/dream to"]="https://www.youtube.com/watch?v=S_MOd40zlYU&list=$playlist_id&index=11"
+  ["medieval lofi radio 🏰 - beats to scribe manuscripts to"]="https://www.youtube.com/watch?v=IxPANmjPaek&list=$playlist_id&index=12"
+  ["christmas lofi music🎄cozy radio to get festive to"]="https://www.youtube.com/watch?v=XSXEaikz0Bc&list=$playlist_id&index=13"
+  ["Halloween lofi radio  🧟‍♀️ - spooky beats to get chills to"]="https://www.youtube.com/watch?v=3GQY80jyysQ&list=$playlist_id&index=14"
+  ["gentle rain ambience 🌧 cozy sound to chill to"]="https://www.youtube.com/watch?v=-OekvEFm1lo&list=$playlist_id&index=15"
+  ["fireplace ambience 🔥 cozy sound to chill to"]="https://www.youtube.com/watch?v=q_4KI-ChIIs&list=$playlist_id&index=16"
+)
+
+loop_track_names=(
+  "Bloody Tears - V rising Adaptation - DLC Legacy Of Castlevania Premium Soundtrack"
+)
+
+declare -A loop_tracks=(
+  ["Bloody Tears - V rising Adaptation - DLC Legacy Of Castlevania Premium Soundtrack"]="https://www.youtube.com/watch?v=7etjdosXsSs"
 )
 
 notification() {
@@ -223,13 +257,20 @@ shuffle_local_music() {
 
 play_preset_online() {
   local choice link
-  local -a preset_names
-  mapfile -t preset_names < <(for name in "${!online_music[@]}"; do printf "%s\n" "$name"; done | sort)
-  choice="$(rofi_array_menu "YouTube Presets" "$rofi_theme" 1 4 12 "${preset_names[@]}")"
+  choice="$(rofi_array_menu "Lofi Girl Radio" "$rofi_theme" 1 4 12 "${online_music_names[@]}")"
   [ -z "$choice" ] && return
 
   link="${online_music[$choice]}"
   start_mpv "$choice" "$link"
+}
+
+play_loop_track() {
+  local choice link
+  choice="$(rofi_array_menu "Looping Tracks" "$rofi_theme" 1 1 6 "${loop_track_names[@]}")"
+  [ -z "$choice" ] && return
+
+  link="${loop_tracks[$choice]}"
+  start_mpv "$choice" --loop-file=inf "$link"
 }
 
 play_direct_url() {
@@ -365,11 +406,78 @@ player_controls_menu() {
   esac
 }
 
+startup_loop_enabled() {
+  grep -Fxq "$startup_command" "$startup_config" 2>/dev/null
+}
+
+set_startup_loop() {
+  local state="$1"
+  local disabled_startup_command="#$startup_command"
+  local tmp
+
+  if [ ! -f "$startup_config" ]; then
+    error_notification "Startup config not found: $startup_config"
+    return 1
+  fi
+
+  tmp="${startup_config}.tmp.$$"
+
+  if [ "$state" = "on" ]; then
+    if grep -Fxq "$startup_command" "$startup_config"; then
+      notification "Boot loop already enabled"
+      return 0
+    fi
+
+    if grep -Fxq "$disabled_startup_command" "$startup_config"; then
+      awk -v disabled="$disabled_startup_command" -v enabled="$startup_command" '
+        $0 == disabled { print enabled; next }
+        { print }
+      ' "$startup_config" > "$tmp" && mv "$tmp" "$startup_config"
+    else
+      {
+        printf "\n# RofiBeats optional startup loops\n"
+        printf "%s\n" "$startup_command"
+      } >> "$startup_config"
+    fi
+
+    notification "Boot loop enabled"
+  else
+    if ! grep -Fxq "$startup_command" "$startup_config"; then
+      notification "Boot loop already disabled"
+      return 0
+    fi
+
+    awk -v enabled="$startup_command" -v disabled="$disabled_startup_command" '
+      $0 == enabled { print disabled; next }
+      { print }
+    ' "$startup_config" > "$tmp" && mv "$tmp" "$startup_config"
+    notification "Boot loop disabled"
+  fi
+
+  rm -f "$tmp" >/dev/null 2>&1 || true
+}
+
+toggle_startup_loop() {
+  if startup_loop_enabled; then
+    set_startup_loop off
+  else
+    set_startup_loop on
+  fi
+}
+
 main_menu() {
-  local user_choice
+  local user_choice startup_action
+  if startup_loop_enabled; then
+    startup_action="Disable Boot Loop"
+  else
+    startup_action="Enable Boot Loop"
+  fi
+
   local actions=(
     "YouTube Search"
-    "Play YouTube Presets"
+    "Play Lofi Girl Radio"
+    "Play Looping Track"
+    "$startup_action"
     "Play From URL"
     "Play from Music directory"
     "Shuffle Play from Music directory"
@@ -382,8 +490,14 @@ main_menu() {
     "YouTube Search")
       search_youtube
       ;;
-    "Play YouTube Presets")
+    "Play Lofi Girl Radio")
       play_preset_online
+      ;;
+    "Play Looping Track")
+      play_loop_track
+      ;;
+    "$startup_action")
+      toggle_startup_loop
       ;;
     "Play From URL")
       play_direct_url
@@ -405,4 +519,17 @@ main_menu() {
   esac
 }
 
-main_menu
+case "${1:-}" in
+  --bloody-tears | --castlevania-loop | --startup-loop)
+    start_mpv "${loop_track_names[0]}" --loop-file=inf "${loop_tracks[${loop_track_names[0]}]}"
+    ;;
+  --lofi-girl | --lofi-radio)
+    start_mpv "${online_music_names[0]}" "${online_music[${online_music_names[0]}]}"
+    ;;
+  --stop)
+    stop_music
+    ;;
+  *)
+    main_menu
+    ;;
+esac
