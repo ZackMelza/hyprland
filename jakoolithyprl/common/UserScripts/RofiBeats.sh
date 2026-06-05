@@ -36,7 +36,7 @@ online_music_names=(
 )
 
 declare -A online_music=(
-  ["lofi hip hop radio 📚 beats to relax/study to"]="https://www.youtube.com/watch?v=EWrX250Zhko&list=$playlist_id&index=1"
+  ["lofi hip hop radio 📚 beats to relax/study to"]="https://www.youtube.com/watch?v=X4VbdwhkE10"
   ["synthwave radio 🌌 beats to chill/game to"]="https://www.youtube.com/watch?v=4xDzrJKXOOY&list=$playlist_id&index=2"
   ["lofi hip hop radio 💤 beats to sleep/chill to"]="https://www.youtube.com/watch?v=JD-kMIpDfnY&list=$playlist_id&index=3"
   ["jazz lofi radio 🎷 beats to chill/study to"]="https://www.youtube.com/watch?v=E2vONfzoyRI&list=$playlist_id&index=4"
@@ -52,6 +52,13 @@ declare -A online_music=(
   ["Halloween lofi radio  🧟‍♀️ - spooky beats to get chills to"]="https://www.youtube.com/watch?v=3GQY80jyysQ&list=$playlist_id&index=14"
   ["gentle rain ambience 🌧 cozy sound to chill to"]="https://www.youtube.com/watch?v=-OekvEFm1lo&list=$playlist_id&index=15"
   ["fireplace ambience 🔥 cozy sound to chill to"]="https://www.youtube.com/watch?v=q_4KI-ChIIs&list=$playlist_id&index=16"
+)
+
+declare -A online_music_fallback_queries=(
+  ["lofi hip hop radio 📚 beats to relax/study to"]="Lofi Girl lofi hip hop radio beats to relax study to live"
+  ["synthwave radio 🌌 beats to chill/game to"]="Lofi Girl synthwave radio beats to chill game to live"
+  ["lofi hip hop radio 💤 beats to sleep/chill to"]="Lofi Girl lofi hip hop radio beats to sleep chill to live"
+  ["jazz lofi radio 🎷 beats to chill/study to"]="Lofi Girl jazz lofi radio beats to chill study to live"
 )
 
 loop_track_names=(
@@ -182,6 +189,18 @@ start_mpv() {
   notification "Now playing: $desc"
 }
 
+start_online_music() {
+  local desc="$1"
+  local link="$2"
+  local fallback_query="${online_music_fallback_queries[$desc]:-}"
+
+  if [ -n "$fallback_query" ]; then
+    start_mpv "$desc" "$link" "ytdl://ytsearch1:${fallback_query}"
+  else
+    start_mpv "$desc" "$link"
+  fi
+}
+
 mpv_ipc() {
   local payload="$1"
 
@@ -261,7 +280,7 @@ play_preset_online() {
   [ -z "$choice" ] && return
 
   link="${online_music[$choice]}"
-  start_mpv "$choice" "$link"
+  start_online_music "$choice" "$link"
 }
 
 play_loop_track() {
@@ -524,7 +543,7 @@ case "${1:-}" in
     start_mpv "${loop_track_names[0]}" --loop-file=inf "${loop_tracks[${loop_track_names[0]}]}"
     ;;
   --lofi-girl | --lofi-radio)
-    start_mpv "${online_music_names[0]}" "${online_music[${online_music_names[0]}]}"
+    start_online_music "${online_music_names[0]}" "${online_music[${online_music_names[0]}]}"
     ;;
   --stop)
     stop_music

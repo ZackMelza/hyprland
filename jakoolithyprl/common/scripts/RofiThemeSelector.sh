@@ -39,8 +39,9 @@ apply_rofi_theme_to_config() {
   temp_rofi_config_file=$(mktemp)
   cp "$ROFI_CONFIG_FILE" "$temp_rofi_config_file"
 
-  # Comment out any existing @theme entry
-  sed -i -E 's/^(\s*@theme)/\\/\\/\1/' "$temp_rofi_config_file"
+  # Keep only one active theme. Rofi can behave badly once repeated previews
+  # leave many active @theme entries behind.
+  sed -i -E 's/^([[:space:]]*)@theme/\1\/\/@theme/' "$temp_rofi_config_file"
 
   # Add the new @theme entry at the end of the file
   echo "@theme \"$theme_path_with_tilde\"" >>"$temp_rofi_config_file"
@@ -51,11 +52,12 @@ apply_rofi_theme_to_config() {
 
   # Prune old commented-out theme lines to prevent clutter
   local max_lines=10
-  local total_lines=$(grep -c '^//\s*@theme' "$ROFI_CONFIG_FILE")
+  local total_lines
+  total_lines=$(grep -Ec '^[[:space:]]*//[[:space:]]*@theme' "$ROFI_CONFIG_FILE")
   if [ "$total_lines" -gt "$max_lines" ]; then
     local excess=$((total_lines - max_lines))
     for ((i = 1; i <= excess; i++)); do
-      sed -i '0,/^\s*\/\/@theme/s///' "$ROFI_CONFIG_FILE"
+      sed -i -E '0,/^[[:space:]]*\/\/[[:space:]]*@theme/ { /^[[:space:]]*\/\/[[:space:]]*@theme/d; }' "$ROFI_CONFIG_FILE"
     done
   fi
 
@@ -91,7 +93,7 @@ fi
 
 # Find the currently active theme to set as the initial selection
 current_selection_index=0
-current_active_theme_path=$(grep -oP '^\s*@theme\s*"\K[^"]+' "$ROFI_CONFIG_FILE" | tail -n 1)
+current_active_theme_path=$(sed -n -E 's/^[[:space:]]*@theme[[:space:]]+"([^"]+)".*/\1/p' "$ROFI_CONFIG_FILE" | tail -n 1)
 if [ -n "$current_active_theme_path" ]; then
   current_active_theme_name=$(basename "$current_active_theme_path")
   for i in "${!available_theme_names[@]}"; do

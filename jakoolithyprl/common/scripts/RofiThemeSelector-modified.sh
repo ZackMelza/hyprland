@@ -45,6 +45,7 @@ rofi_config_file="${XDG_CONFIG_HOME:-${HOME}/.config}/rofi/config.rasi"
 ##
 declare -a themes
 declare -a theme_names
+declare -A seen_theme_names
 
 ##
 # Function that tries to find all installed rofi themes.
@@ -52,18 +53,26 @@ declare -a theme_names
 ##
 # Find themes in defined directories
 find_themes() {
-    directories=("$HOME/.local/share/rofi/themes" "$HOME/.config/rofi/themes")
+    directories=("$HOME/.config/rofi/themes" "$HOME/.local/share/rofi/themes")
     
     for TD in "${directories[@]}"; do
         if [ -d "$TD" ]; then
             echo "Checking themes in: $TD"
             for file in "$TD"/*.rasi; do
-                if [ -f "$file" ] && [ ! -L "$file" ]; then
-                    themes+=("$file")
-                    theme_names+=("$(basename "${file%.*}")")
-                else
-                    echo "Skipping symlink: $file"
+                [ -f "$file" ] || continue
+
+                local theme_name theme_path
+                theme_name="$(basename "${file%.*}")"
+                [ -n "${seen_theme_names[$theme_name]:-}" ] && continue
+
+                theme_path="$file"
+                if [ -L "$theme_path" ]; then
+                    theme_path=$(readlink -f "$theme_path")
                 fi
+
+                themes+=("$theme_path")
+                theme_names+=("$theme_name")
+                seen_theme_names[$theme_name]=1
             done
         else
             echo "Directory does not exist: $TD"
@@ -75,16 +84,10 @@ find_themes() {
 # Function to add or update theme in the config.rasi
 ##
 add_theme_to_config() {
-    local theme_name="$1"
-    local theme_path
+    local theme_path="$1"
 
-    # Determine the correct path for the theme
-    if [[ -f "$HOME/.local/share/rofi/themes/$theme_name.rasi" ]]; then
-        theme_path="$HOME/.local/share/rofi/themes/$theme_name.rasi"
-    elif [[ -f "$HOME/.config/rofi/themes/$theme_name.rasi" ]]; then
-        theme_path="$HOME/.config/rofi/themes/$theme_name.rasi"
-    else
-        echo "Theme not found: $theme_name"
+    if [[ ! -f "$theme_path" ]]; then
+        echo "Theme not found: $theme_path"
         return 1
     fi
 
@@ -97,23 +100,23 @@ add_theme_to_config() {
     theme_path_with_tilde="~${theme_path#$HOME}"
 
     # Add or update @theme line in config
-    if ! grep -q '^\s*@theme' "$rofi_config_file"; then
+    if ! grep -Eq '^[[:space:]]*@theme' "$rofi_config_file"; then
         echo -e "\n\n@theme \"$theme_path_with_tilde\"" >> "$rofi_config_file"
         echo "Added @theme \"$theme_path_with_tilde\" to $rofi_config_file"
     else
-        $SED -i "s/^\(\s*@theme.*\)/\/\/\1/" "$rofi_config_file"
+        $SED -i -E 's/^([[:space:]]*)@theme/\1\/\/@theme/' "$rofi_config_file"
         echo -e "@theme \"$theme_path_with_tilde\"" >> "$rofi_config_file"
         echo "Updated @theme line to $theme_path_with_tilde"
     fi
 
     # Limit the number of @theme lines to a maximum of 9
     max_lines=9
-    total_lines=$(grep -c '^\s*//@theme' "$rofi_config_file")
+    total_lines=$(grep -Ec '^[[:space:]]*//[[:space:]]*@theme' "$rofi_config_file")
 
     if [ "$total_lines" -gt "$max_lines" ]; then
         excess=$((total_lines - max_lines))
         for i in $(seq 1 "$excess"); do
-            $SED -i '0,/^\s*\/\/@theme/ { /^\s*\/\/@theme/ {d; q; }}' "$rofi_config_file"
+            $SED -i -E '0,/^[[:space:]]*\/\/[[:space:]]*@theme/ { /^[[:space:]]*\/\/[[:space:]]*@theme/ {d; q; }}' "$rofi_config_file"
         done
         echo "Removed excess //@theme lines"
     fi
@@ -136,7 +139,7 @@ create_theme_list()
 {
     OLDIFS=${IFS}
     IFS='|'
-    for themen in ${theme_names[@]}
+    for themen in "${theme_names[@]}"
     do
         echo "${themen}"
     done
@@ -164,12 +167,12 @@ select_theme()
 Current theme: <b>${CUR}</b>
 <span weight=\"bold\" size=\"xx-small\">When setting a new theme this will override previous theme settings.
 Please update your config file if you have local modifications.</span>"""
-        THEME_FLAG=
+        THEME_FLAG=()
         if [ -n "${SELECTED}" ]
         then
-            THEME_FLAG="-theme ${themes[${SELECTED}]}"
+            THEME_FLAG=(-theme "${themes[${SELECTED}]}")
         fi
-        RES=$( create_theme_list | ${ROFI} ${THEME_FLAG} ${MORE_FLAGS[@]} -cycle -selected-row "${SELECTED}" -mesg "${MESG}")
+        RES=$( create_theme_list | ${ROFI} "${THEME_FLAG[@]}" "${MORE_FLAGS[@]}" -cycle -selected-row "${SELECTED}" -mesg "${MESG}")
         RTR=$?
         if [ "${RTR}" = 10 ]
         then
@@ -214,7 +217,7 @@ create_config_copy
 if select_theme && [ -n "${SELECTED}" ]
 then
     # Apply the selected theme
-    add_theme_to_config "${theme_names[${SELECTED}]}"
+    add_theme_to_config "${themes[${SELECTED}]}"
 
     # Send notification with the selected theme name
     selection="${theme_names[${SELECTED}]}"
