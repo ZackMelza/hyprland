@@ -116,6 +116,7 @@ active_userconfigs_dir="$active_dir/UserConfigs"
 active_host_conf="$active_userconfigs_dir/Host.conf"
 guard_service_name="hypr-config-guard.service"
 guard_path_name="hypr-config-guard.path"
+graphical_session_service_name="hypr-graphical-session.service"
 
 link_managed_path() {
   local target="$1"
@@ -202,6 +203,18 @@ Unit=$guard_service_name
 
 [Install]
 WantedBy=default.target
+EOF
+
+  cat > "$systemd_user_dir/$graphical_session_service_name" <<'EOF'
+[Unit]
+Description=Connect a direct Hyprland launch to graphical-session.target
+Wants=graphical-session.target
+After=graphical-session-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/true
 EOF
 
   systemctl --user daemon-reload

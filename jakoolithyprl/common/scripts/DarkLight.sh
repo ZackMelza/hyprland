@@ -13,18 +13,13 @@ ags_style="$HOME/.config/ags/user/style.css"
 SCRIPTSDIR="$HOME/.config/hypr/scripts"
 notif="$HOME/.config/swaync/images/bell.png"
 wallust_rofi="$HOME/.config/wallust/templates/colors-rofi.rasi"
+theme_mode_file="$HOME/.cache/.theme_mode"
 
 kitty_conf="$HOME/.config/kitty/kitty.conf"
 
 wallust_config="$HOME/.config/wallust/wallust.toml"
 pallete_dark="dark16"
 pallete_light="light16"
-
-# intial kill process
-for pid in waybar rofi swaync ags swaybg; do
-    killall -SIGUSR1 "$pid"
-done
-
 
 # Initialize wallpaper backend if needed
 if command -v swww >/dev/null 2>&1; then
@@ -50,7 +45,25 @@ fi
 effect="--transition-bezier .43,1.19,1,.4 --transition-fps 60 --transition-type grow --transition-pos 0.925,0.977 --transition-duration 2"
 
 # Determine current theme mode
-if [ "$(cat $HOME/.cache/.theme_mode)" = "Light" ]; then
+current_mode=""
+if command -v gsettings >/dev/null 2>&1; then
+    color_scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null)"
+    if [[ "$color_scheme" == *prefer-dark* ]]; then
+        current_mode="Dark"
+    elif [[ "$color_scheme" == *prefer-light* ]]; then
+        current_mode="Light"
+    fi
+fi
+
+if [[ -z "$current_mode" && -r "$theme_mode_file" ]]; then
+    current_mode="$(<"$theme_mode_file")"
+fi
+
+if [[ "$current_mode" != "Dark" && "$current_mode" != "Light" ]]; then
+    current_mode="Light"
+fi
+
+if [[ "$current_mode" == "Light" ]]; then
     next_mode="Dark"
     # Logic for Dark mode
     wallpaper_path="$dark_wallpapers"
@@ -62,7 +75,8 @@ fi
 
 # Function to update theme mode for the next cycle
 update_theme_mode() {
-    echo "$next_mode" > "$HOME/.cache/.theme_mode"
+    mkdir -p "$(dirname "$theme_mode_file")"
+    printf '%s\n' "$next_mode" > "$theme_mode_file"
 }
 
 # Function to notify user
@@ -255,16 +269,8 @@ set_custom_gtk_theme "$next_mode"
 update_theme_mode
 
 
-${SCRIPTSDIR}/WallustSwww.sh "$next_wallpaper" &&
-
-sleep 2
-# kill process
-for pid1 in waybar rofi swaync ags swaybg; do
-    killall "$pid1"
-done
-
-sleep 1
-${SCRIPTSDIR}/Refresh.sh 
+"${SCRIPTSDIR}/WallustSwww.sh" "$next_wallpaper"
+"${SCRIPTSDIR}/Refresh.sh"
 
 sleep 0.5
 # Display notifications for theme and icon changes 

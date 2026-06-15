@@ -37,7 +37,10 @@ WALLUST_RELOAD_WAYBAR=0 "${SCRIPTSDIR}/WallustSwww.sh" "$wallpaper_path"
 sleep 0.2
 
 # reload swaync
-swaync-client --reload-config
+if command -v swaync-client >/dev/null 2>&1; then
+    swaync-client --reload-config >/dev/null 2>&1 || true
+    swaync-client --reload-css >/dev/null 2>&1 || true
+fi
 
 # Relaunching rainbow borders if the script exists
 sleep 1
