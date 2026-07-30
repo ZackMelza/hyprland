@@ -158,6 +158,93 @@ check_obsolete_config() {
   fi
 }
 
+normalize_locale() {
+  printf '%s' "$1" |
+    tr '[:upper:]' '[:lower:]' |
+    tr -d '._-'
+}
+
+check_locale() {
+  local configured=""
+  local configured_normalized=""
+  local available=""
+  local available_normalized=""
+
+  if [[ -r /etc/locale.conf ]]; then
+    configured="$(awk -F= '$1 == "LANG" { print $2; exit }' /etc/locale.conf)"
+  fi
+  configured="${configured:-${LANG:-}}"
+
+  if [[ -z "$configured" ]]; then
+    warn "no LANG locale is configured"
+    return
+  fi
+
+  configured_normalized="$(normalize_locale "$configured")"
+  while IFS= read -r available; do
+    available_normalized="$(normalize_locale "$available")"
+    if [[ "$available_normalized" == "$configured_normalized" ]]; then
+      ok "configured locale $configured is generated"
+      return
+    fi
+  done < <(locale -a 2>/dev/null)
+
+  fail "configured locale $configured is not generated (run locale-gen after enabling it in /etc/locale.gen)"
+}
+
+check_rofi() {
+  local launcher="$active_dir/scripts/RofiLauncher.sh"
+  local keybinds="$active_dir/UserConfigs/UserKeybinds.conf"
+  local output=""
+
+  if command -v rofi >/dev/null 2>&1; then
+    ok "rofi is installed: $(rofi -version 2>&1 | head -n 1)"
+  else
+    fail "rofi is not installed or not on PATH"
+    return
+  fi
+
+  if [[ -x "$launcher" ]]; then
+    ok "Rofi launcher wrapper is executable"
+  elif [[ -e "$launcher" ]]; then
+    fail "Rofi launcher wrapper is not executable: ${launcher#$repo_root/}"
+  else
+    fail "Rofi launcher wrapper is missing: ${launcher#$repo_root/}"
+  fi
+
+  if grep -qF 'bind = $mainMod, R, exec, $scriptsDir/RofiLauncher.sh' "$keybinds" 2>/dev/null; then
+    ok "SUPER+R is bound to the Rofi launcher wrapper"
+  else
+    fail "SUPER+R is not bound to the Rofi launcher wrapper"
+  fi
+
+  output="$(rofi -show drun -dump-config 2>&1 >/dev/null)"
+  if [[ -z "$output" ]]; then
+    ok "Rofi configuration parses successfully"
+  else
+    fail "Rofi configuration reported errors"
+    printf '%s\n' "$output" | print_block
+  fi
+}
+
+check_config_backend() {
+  local version=""
+
+  if command -v Hyprland >/dev/null 2>&1; then
+    version="$(Hyprland --version 2>/dev/null | head -n 1)"
+    ok "installed $version"
+  else
+    fail "Hyprland is not installed or not on PATH"
+    return
+  fi
+
+  if [[ -e "$active_dir/hyprland.lua" ]]; then
+    ok "Lua configuration entry point is present"
+  else
+    warn "using the supported legacy .conf backend; Hyprland now recommends Lua, so review this before a future removal"
+  fi
+}
+
 check_portability() {
   local matches=""
 
@@ -203,6 +290,9 @@ main() {
   check_active_tree
   check_guard
   check_obsolete_config
+  check_locale
+  check_rofi
+  check_config_backend
   check_portability
   check_hyprctl
 

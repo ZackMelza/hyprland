@@ -43,6 +43,13 @@ icon_on() {
 
 cmd_toggle() {
   ensure_state
+
+  if ! command -v hyprsunset >/dev/null 2>&1; then
+    echo off > "$STATE_FILE"
+    notify-send -u normal "Hyprsunset unavailable" "Install hyprsunset to use night light." || true
+    return 1
+  fi
+
   state="$(cat "$STATE_FILE" || echo off)"
 
   # Always stop any running hyprsunset first to avoid CTM manager conflicts
@@ -73,6 +80,12 @@ if [[ "$state" == "on" ]]; then
 
 cmd_status() {
   ensure_state
+
+  if ! command -v hyprsunset >/dev/null 2>&1; then
+    printf '{"text":"","class":"unavailable","tooltip":"Hyprsunset is not installed"}\n'
+    return
+  fi
+
   # Prefer live process detection; fall back to state file
   if pgrep -x hyprsunset >/dev/null 2>&1; then
     onoff="on"
