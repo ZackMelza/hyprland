@@ -109,7 +109,7 @@ hl.window_rule({ match = { tag = [=[settings]=] }, size = { [=[(monitor_w*0.7)]=
 hl.window_rule({ match = { class = [=[^([Ww]hatsapp-for-linux|ZapZap|com.rtosta.zapzap)$]=] }, size = { [=[(monitor_w*0.6)]=], [=[(monitor_h*0.7)]=] } })
 hl.window_rule({ match = { class = [=[^([Ff]erdium)$]=] }, size = { [=[(monitor_w*0.6)]=], [=[(monitor_h*0.7)]=] } })
 hl.window_rule({ match = { title = [=[^(Picture-in-Picture)$]=] }, pin = true })
--- TODO verify keep_aspect_ratio in Hyprland 0.57: hl.window_rule({ match = { title = [=[^(Picture-in-Picture)$]=] }, keep_aspect_ratio = true })
+hl.window_rule({ match = { title = [=[^(Picture-in-Picture)$]=] }, keep_aspect_ratio = true })
 hl.window_rule({ match = { tag = [=[games]=] }, no_blur = true })
 hl.window_rule({ match = { class = [=[^(steam_app_1449850)$]=] }, fullscreen = true })
 hl.window_rule({ match = { class = [=[^(jetbrains-*)]=] }, no_initial_focus = true })
