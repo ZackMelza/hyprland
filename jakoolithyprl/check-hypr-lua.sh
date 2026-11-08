@@ -200,9 +200,13 @@ else
 fi
 if command -v systemctl >/dev/null 2>&1 &&
    systemctl --user is-active --quiet hypr-config-guard.path 2>/dev/null; then
-  warn 'Legacy guard is active but watches .conf, not hyprland.lua'
+  warn 'A guard path is active; verify that the installed user unit watches hyprland.lua (not the old .conf)'
 fi
-warn 'Profile installer remains legacy: do not run set-hypr-profile.sh yet'
+if grep -q 'link_lua_source' "$root/set-hypr-profile.sh"; then
+  pass 'Profile installer has Lua-aware setup with guarded links'
+else
+  warn 'Profile installer lacks managed Lua symlink support'
+fi
 warn 'App-specific rules, gestures, device overrides and shell scripts need parity testing'
 
 section 'Summary'
