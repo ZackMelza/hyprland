@@ -17,7 +17,7 @@ end
 local animations = {
   {"windows",6,"wind","slide"}, {"windowsIn",5,"winIn","slide"},
   {"windowsOut",3,"smoothOut","slide"}, {"windowsMove",5,"wind","slide"},
-  {"border",1,"liner"}, {"borderangle",180,"liner","loop"},
+  {"border",1,"liner"}, {"borderangle",100,"liner","loop"},
   {"fade",3,"smoothOut"}, {"workspaces",5,"overshot"},
   {"workspacesIn",5,"winIn","slide"},
   {"workspacesOut",5,"winOut","slide"},
