@@ -130,5 +130,7 @@ hl.window_rule({
   name = "kitty-start-tiled",
   match = { class = "^kitty$" },
   tile = true,
+  maximize = false,
   fullscreen_state = "0 0",
+  suppress_event = "maximize",
 })
