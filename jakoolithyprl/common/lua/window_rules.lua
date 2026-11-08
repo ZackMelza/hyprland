@@ -122,3 +122,13 @@ hl.layer_rule({ match = { namespace = [=[rofi]=] }, blur = true })
 hl.layer_rule({ match = { namespace = [=[notifications]=] }, blur = true })
 hl.layer_rule({ match = { namespace = [=[quickshell:overview]=] }, blur = true })
 hl.layer_rule({ match = { namespace = [=[quickshell:overview]=] }, ignore_alpha = 0.5 })
+
+-- Regular Kitty terminals must open as *normal tiled* windows, not maximized.
+-- fullscreen=1 in 'hyprctl clients' denotes maximized state, not an exclusive
+-- fullscreen window. Keep this at the end to win over earlier static rules.
+hl.window_rule({
+  name = "kitty-start-tiled",
+  match = { class = "^kitty$" },
+  tile = true,
+  fullscreen_state = "0 0",
+})
