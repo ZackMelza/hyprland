@@ -29,7 +29,6 @@ hl.bind("xf86AudioMicMute", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Volume.s
 hl.bind("xf86audiomute", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Volume.sh --toggle"), { locked = true })
 hl.bind("xf86Sleep", hl.dsp.exec_cmd("systemctl suspend"), { locked = true })
 hl.bind("xf86Rfkill", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/AirplaneMode.sh"), { locked = true })
-hl.bind("xf86AudioPlayPause", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"), { locked = true })
 hl.bind("xf86AudioPause", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"), { locked = true })
 hl.bind("xf86AudioPlay", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"), { locked = true })
 hl.bind("xf86AudioNext", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --nxt"), { locked = true })
