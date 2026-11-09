@@ -55,7 +55,7 @@ The guard refuses to overwrite unknown custom `hyprland.lua` files and backs up 
 
 ## Known incomplete parity / follow-up checks
 
-1. **Two legacy shortcuts remain deliberately deferred:** `Super+Alt+Space` (old `workspaceopt allfloat`) and `Super+Ctrl+O` (old `setprop opaque toggle`). They must be migrated to supported 0.57 Lua calls and tested against actual windows. They are **not** silently claimed as working. The original fullscreen, workspace, and zoom keybindings were otherwise migrated; zoom still needs manual testing after the latest commit.
+1. **The two formerly deferred shortcuts now have native Lua implementations:** `Super+Alt+Space` (toggle floating state for every window on the focused workspace) and `Super+Ctrl+O` (per-window opaque override toggle). **Their interactive behavior still requires manual testing.** Zoom wheel also requires manual testing. Do not equate parsed Lua with observed shortcut behavior.
 2. Static declarations and `hyprctl configerrors` cannot prove every window rule's effects, device-specific controller configuration, three-finger touchpad gestures, keybind semantic parity, or all shell helper scripts.
 3. The machine-specific monitor Lua override was generated from old `eDP-1` and `HDMI-A-1` settings; the active single connected display was reported as `DP-3 2560x1440 scale 1` and falls back to the wildcard monitor rule. Update host-only overrides once its intended layout is confirmed.
 4. The corrected wlogout action is in a **local application file**, not yet distributed by this repository; any preset/setup claiming reproducible logout must include a safe handling step.
@@ -64,6 +64,6 @@ The guard refuses to overwrite unknown custom `hyprland.lua` files and backs up 
 
 ## Merge and downstream sync gates
 
-Create and review a PR from `fix/hyprland-057-lua-v2` to `main`. Merge only after local smoke checks, guard verification, keybinding parity decisions and host-specific behavior are accepted. Do not infer readiness from a clean `luac` or `hyprctl configerrors` alone.
+PR #4 is the accepted working-desktop recovery milestone. Local smoke checks and guard verification passed on Hyprland 0.57.1. Remaining manual parity tests are explicitly tracked in [source issue #5](https://github.com/ZackMelza/hyprland/issues/5), and are not represented as verified. Do not infer every feature is working from a clean `luac` or `hyprctl configerrors` alone. The working desktop should not be switched to `main` blindly: it is linked to the source checkout currently on `fix/hyprland-057-lua-v2`.
 
 The dependent `ZackMelza/linux-builds` task is [N-002 — JaKooLit Lua migration synchronization](https://github.com/ZackMelza/linux-builds/blob/main/needs/N-002-jakoolit-hyprland-lua-migration.md). Its `presets/jakoolit/` import is **out of date**: after this source PR is approved, pin the approved source commit, diff the imported preset and migrate it separately. Never deploy the imported preset to the daily desktop merely because the original repository's Lua mode works.
