@@ -1,0 +1,36 @@
+name: Hyprland Lua migration static checks
+
+on:
+  pull_request:
+    paths:
+      - 'jakoolithyprl/common/**'
+      - 'jakoolithyprl/*.sh'
+      - '.github/workflows/hyprland-lua-migration.yml'
+  push:
+    branches:
+      - 'fix/hyprland-057-lua-v2'
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.4 compiler
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - name: Validate managed shell scripts
+        run: |
+          bash -n \
+            jakoolithyprl/set-hypr-profile.sh \
+            jakoolithyprl/common/scripts/GuardHyprConfig.sh \
+            jakoolithyprl/check-hypr-lua.sh \
+            jakoolithyprl/stage-lua-recovery.sh \
+            jakoolithyprl/install-lua-guard.sh \
+            jakoolithyprl/preflight-lua-migration.sh
+      - name: Validate Lua entrypoint and modules
+        run: |
+          luac5.4 -p jakoolithyprl/common/hyprland.lua
+          find jakoolithyprl/common/lua -type f -name '*.lua' -print0 |
+            xargs -0 -r luac5.4 -p
+      - name: Ensure migration is not silently declared complete
+        run: |
+          grep -q '## Known incomplete parity' jakoolithyprl/LUA-MIGRATION-HANDOFF.md

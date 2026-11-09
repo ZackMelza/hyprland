@@ -1,0 +1,217 @@
+-- Initial migration from ZackMelza/hyprland legacy JaKooLit .conf.
+-- Generated for compatibility testing with Hyprland 0.57.
+-- Keep original .conf files as the authoritative reference until verified.
+-- Derived from common/configs/Keybinds.conf followed by UserKeybinds.conf.
+-- Bind order is preserved. Review differences after runtime testing.
+local home = assert(os.getenv("HOME"))
+hl.bind("CTRL + ALT + Delete", hl.dsp.exit())
+hl.bind("SUPER + Q", hl.dsp.window.close())
+hl.bind("SUPER + SHIFT + Q", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/KillActiveProcess.sh"))
+hl.bind("CTRL + ALT + L", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/LockScreen.sh"))
+hl.bind("CTRL + ALT + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Wlogout.sh"))
+hl.bind("SUPER + SHIFT + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
+hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Kool_Quick_Settings.sh"))
+hl.bind("SUPER + CTRL + D", hl.dsp.layout("removemaster"))
+hl.bind("SUPER + I", hl.dsp.layout("addmaster"))
+hl.bind("SUPER + J", hl.dsp.layout("cyclenext"))
+hl.bind("SUPER + K", hl.dsp.layout("cycleprev"))
+hl.bind("SUPER + CTRL + Return", hl.dsp.layout("swapwithmaster"))
+hl.bind("SUPER + SHIFT + I", hl.dsp.layout("togglesplit"))
+hl.bind("SUPER + P", hl.dsp.window.pseudo())
+hl.bind("SUPER + M", hl.dsp.layout("splitratio 0.3"))
+hl.bind("SUPER + G", hl.dsp.group.toggle())
+hl.bind("SUPER + CTRL + tab", hl.dsp.group.next())
+-- Multiple actions on a single binding must be dispatched explicitly;
+-- separate bindings for one chord can shadow each other.
+hl.bind("ALT + tab", function()
+  hl.dispatch(hl.dsp.window.cycle_next())
+  hl.dispatch(hl.dsp.window.alter_zorder({ mode = "top" }))
+end)
+hl.bind("xf86audioraisevolume", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Volume.sh --inc"), { locked = true, repeating = true })
+hl.bind("xf86audiolowervolume", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Volume.sh --dec"), { locked = true, repeating = true })
+hl.bind("xf86AudioMicMute", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Volume.sh --toggle-mic"), { locked = true })
+hl.bind("xf86audiomute", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Volume.sh --toggle"), { locked = true })
+hl.bind("xf86Sleep", hl.dsp.exec_cmd("systemctl suspend"), { locked = true })
+hl.bind("xf86Rfkill", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/AirplaneMode.sh"), { locked = true })
+hl.bind("xf86AudioPause", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"), { locked = true })
+hl.bind("xf86AudioPlay", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"), { locked = true })
+hl.bind("xf86AudioNext", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --nxt"), { locked = true })
+hl.bind("xf86AudioPrev", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --prv"), { locked = true })
+hl.bind("xf86audiostop", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --stop"), { locked = true })
+hl.bind("SUPER + Print", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --now"))
+hl.bind("SUPER + SHIFT + Print", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --area"))
+hl.bind("SUPER + CTRL + Print", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --in5"))
+hl.bind("SUPER + CTRL + SHIFT + Print", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --in10"))
+hl.bind("ALT + Print", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --active"))
+hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --swappy"))
+hl.bind("SUPER + SHIFT + left", hl.dsp.window.resize({ x = -50, y = 0, relative = true }), { repeating = true })
+hl.bind("SUPER + SHIFT + right", hl.dsp.window.resize({ x = 50, y = 0, relative = true }), { repeating = true })
+hl.bind("SUPER + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -50, relative = true }), { repeating = true })
+hl.bind("SUPER + SHIFT + down", hl.dsp.window.resize({ x = 0, y = 50, relative = true }), { repeating = true })
+hl.bind("SUPER + CTRL + left", hl.dsp.window.move({ direction = "left" }))
+hl.bind("SUPER + CTRL + right", hl.dsp.window.move({ direction = "right" }))
+hl.bind("SUPER + CTRL + up", hl.dsp.window.move({ direction = "up" }))
+hl.bind("SUPER + CTRL + down", hl.dsp.window.move({ direction = "down" }))
+hl.bind("SUPER + ALT + left", hl.dsp.window.swap({ direction = "left" }))
+hl.bind("SUPER + ALT + right", hl.dsp.window.swap({ direction = "right" }))
+hl.bind("SUPER + ALT + up", hl.dsp.window.swap({ direction = "up" }))
+hl.bind("SUPER + ALT + down", hl.dsp.window.swap({ direction = "down" }))
+hl.bind("SUPER + left", hl.dsp.focus({ direction = "left" }))
+hl.bind("SUPER + right", hl.dsp.focus({ direction = "right" }))
+hl.bind("SUPER + up", hl.dsp.focus({ direction = "up" }))
+hl.bind("SUPER + down", hl.dsp.focus({ direction = "down" }))
+hl.bind("SUPER + tab", hl.dsp.focus({ workspace = "m+1" }))
+hl.bind("SUPER + SHIFT + tab", hl.dsp.focus({ workspace = "m-1" }))
+hl.bind("SUPER + SHIFT + U", hl.dsp.window.move({ workspace = "special:special" }))
+hl.bind("SUPER + U", hl.dsp.workspace.toggle_special("special"))
+hl.bind("SUPER + code:10", hl.dsp.focus({ workspace = "1" }))
+hl.bind("SUPER + code:11", hl.dsp.focus({ workspace = "2" }))
+hl.bind("SUPER + code:12", hl.dsp.focus({ workspace = "3" }))
+hl.bind("SUPER + code:13", hl.dsp.focus({ workspace = "4" }))
+hl.bind("SUPER + code:14", hl.dsp.focus({ workspace = "5" }))
+hl.bind("SUPER + code:15", hl.dsp.focus({ workspace = "6" }))
+hl.bind("SUPER + code:16", hl.dsp.focus({ workspace = "7" }))
+hl.bind("SUPER + code:17", hl.dsp.focus({ workspace = "8" }))
+hl.bind("SUPER + code:18", hl.dsp.focus({ workspace = "9" }))
+hl.bind("SUPER + code:19", hl.dsp.focus({ workspace = "10" }))
+hl.bind("SUPER + SHIFT + code:10", hl.dsp.window.move({ workspace = "1" }))
+hl.bind("SUPER + SHIFT + code:11", hl.dsp.window.move({ workspace = "2" }))
+hl.bind("SUPER + SHIFT + code:12", hl.dsp.window.move({ workspace = "3" }))
+hl.bind("SUPER + SHIFT + code:13", hl.dsp.window.move({ workspace = "4" }))
+hl.bind("SUPER + SHIFT + code:14", hl.dsp.window.move({ workspace = "5" }))
+hl.bind("SUPER + SHIFT + code:15", hl.dsp.window.move({ workspace = "6" }))
+hl.bind("SUPER + SHIFT + code:16", hl.dsp.window.move({ workspace = "7" }))
+hl.bind("SUPER + SHIFT + code:17", hl.dsp.window.move({ workspace = "8" }))
+hl.bind("SUPER + SHIFT + code:18", hl.dsp.window.move({ workspace = "9" }))
+hl.bind("SUPER + SHIFT + code:19", hl.dsp.window.move({ workspace = "10" }))
+hl.bind("SUPER + SHIFT + bracketleft", hl.dsp.window.move({ workspace = "m-1" }))
+hl.bind("SUPER + SHIFT + bracketright", hl.dsp.window.move({ workspace = "m+1" }))
+hl.bind("SUPER + CTRL + code:10", hl.dsp.window.move({ workspace = "1", follow = false }))
+hl.bind("SUPER + CTRL + code:11", hl.dsp.window.move({ workspace = "2", follow = false }))
+hl.bind("SUPER + CTRL + code:12", hl.dsp.window.move({ workspace = "3", follow = false }))
+hl.bind("SUPER + CTRL + code:13", hl.dsp.window.move({ workspace = "4", follow = false }))
+hl.bind("SUPER + CTRL + code:14", hl.dsp.window.move({ workspace = "5", follow = false }))
+hl.bind("SUPER + CTRL + code:15", hl.dsp.window.move({ workspace = "6", follow = false }))
+hl.bind("SUPER + CTRL + code:16", hl.dsp.window.move({ workspace = "7", follow = false }))
+hl.bind("SUPER + CTRL + code:17", hl.dsp.window.move({ workspace = "8", follow = false }))
+hl.bind("SUPER + CTRL + code:18", hl.dsp.window.move({ workspace = "9", follow = false }))
+hl.bind("SUPER + CTRL + code:19", hl.dsp.window.move({ workspace = "10", follow = false }))
+hl.bind("SUPER + CTRL + bracketleft", hl.dsp.window.move({ workspace = "m-1", follow = false }))
+hl.bind("SUPER + CTRL + bracketright", hl.dsp.window.move({ workspace = "m+1", follow = false }))
+hl.bind("SUPER + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind("SUPER + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+hl.bind("SUPER + period", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind("SUPER + comma", hl.dsp.focus({ workspace = "e-1" }))
+hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
+hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
+hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/RofiLauncher.sh"))
+hl.bind("SUPER + B", hl.dsp.exec_cmd("xdg-open \"https://\""))
+hl.bind("SUPER + A", hl.dsp.global("quickshell:overviewToggle"))
+hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"))
+hl.bind("SUPER + E", hl.dsp.exec_cmd("thunar"))
+hl.bind("SUPER + D", hl.dsp.exec_cmd("discord"))
+hl.bind("SUPER + C", hl.dsp.exec_cmd("code"))
+hl.bind("SUPER + H", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/KeyHints.sh"))
+hl.bind("SUPER + ALT + R", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Refresh.sh"))
+hl.bind("SUPER + ALT + E", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/RofiEmoji.sh"))
+hl.bind("SUPER + S", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/RofiSearch.sh"))
+hl.bind("SUPER + CTRL + S", hl.dsp.exec_cmd("rofi -show window"))
+hl.bind("SUPER + ALT + O", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ChangeBlur.sh"))
+hl.bind("SUPER + SHIFT + G", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/GameMode.sh"))
+hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ChangeLayout.sh"))
+hl.bind("SUPER + ALT + V", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ClipManager.sh"))
+hl.bind("SUPER + CTRL + R", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/RofiThemeSelector.sh"))
+hl.bind("SUPER + CTRL + SHIFT + R", hl.dsp.exec_cmd("pkill rofi || true && $HOME/.config/hypr/scripts/RofiThemeSelector-modified.sh"))
+hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+hl.bind("SUPER + CTRL + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
+hl.bind("SUPER + SPACE", hl.dsp.window.float({ action = "toggle" }))
+-- Toggle every regular window in the active workspace between floating and tiled.
+-- This replaces the removed workspaceopt allfloat dispatcher.
+hl.bind("SUPER + ALT + SPACE", function()
+  local workspace = hl.get_active_workspace()
+  if not workspace then return end
+  local windows = hl.get_workspace_windows(workspace)
+  if not windows or #windows == 0 then return end
+
+  local all_floating = true
+  for _, window in ipairs(windows) do
+    if not window.floating then
+      all_floating = false
+      break
+    end
+  end
+
+  for _, window in ipairs(windows) do
+    hl.dispatch(hl.dsp.window.float({
+      window = window, action = all_floating and "unset" or "set"
+    }))
+  end
+end)
+hl.bind("SUPER + SHIFT + Return", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Dropterminal.sh kitty"))
+hl.bind("SUPER + ALT + mouse_down", function()
+  local factor = math.max(1, tonumber(hl.get_config("cursor.zoom_factor")) or 1)
+  hl.config({ cursor = { zoom_factor = math.min(8, factor * 2) } })
+end)
+hl.bind("SUPER + ALT + mouse_up", function()
+  local factor = math.max(1, tonumber(hl.get_config("cursor.zoom_factor")) or 1)
+  hl.config({ cursor = { zoom_factor = math.max(1, factor / 2) } })
+end)
+hl.bind("SUPER + CTRL + ALT + B", hl.dsp.exec_cmd("pkill -SIGUSR1 waybar"))
+hl.bind("SUPER + CTRL + B", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/WaybarStyles.sh"))
+hl.bind("SUPER + ALT + B", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/WaybarLayout.sh"))
+hl.bind("SUPER + N", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Hyprsunset.sh toggle"))
+hl.bind("SUPER + SHIFT + M", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/RofiBeats.sh"))
+hl.bind("SUPER + W", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/WallpaperSelect.sh"))
+hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/WallpaperEffects.sh"))
+hl.bind("CTRL + ALT + W", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/WallpaperRandom.sh"))
+-- Preserve the old opaque-toggle shortcut with the native window property API.
+-- Explicit "1"/"unset" avoids reliance on removed shell-side setprop parsing.
+-- State is per window for the lifetime of this Lua config (reload resets it).
+local opaque_toggles = {}
+hl.bind("SUPER + CTRL + O", function()
+  local window = hl.get_active_window()
+  if not window then return end
+  local key = tostring(window.address)
+  local enabled = not opaque_toggles[key]
+  hl.dispatch(hl.dsp.window.set_prop({
+    window = window, prop = "opaque", value = enabled and "1" or "unset"
+  }))
+  opaque_toggles[key] = enabled
+end)
+hl.bind("SUPER + SHIFT + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/KeyBinds.sh"))
+hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Animations.sh"))
+hl.bind("SUPER + SHIFT + O", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/ZshChangeTheme.sh"))
+hl.bind("ALT_L + SHIFT_L", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/SwitchKeyboardLayout.sh"), { locked = true })
+hl.bind("SHIFT_L + ALT_L", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Tak0-Per-Window-Switch.sh"), { locked = true })
+hl.bind("SUPER + ALT + C", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/RofiCalc.sh"))
+hl.bind("SUPER + CTRL + F9", hl.dsp.workspace.move({ monitor = "l" }))
+hl.bind("SUPER + CTRL + F10", hl.dsp.workspace.move({ monitor = "r" }))
+hl.bind("SUPER + CTRL + F11", hl.dsp.workspace.move({ monitor = "u" }))
+hl.bind("SUPER + CTRL + F12", hl.dsp.workspace.move({ monitor = "d" }))
+-- Legacy laptop-specific bindings are conditional on HYPR_PROFILE.
+local profile = os.getenv("HYPR_PROFILE")
+if not profile then
+  local f=io.open(home .. "/.config/environment.d/99-hypr.conf","r")
+  if f then
+    for line in f:lines() do
+      local value=line:match("^HYPR_PROFILE=(%w+)%s*$")
+      if value then profile=value end
+    end
+    f:close()
+  end
+end
+if profile == "laptop" then
+  hl.bind("xf86KbdBrightnessDown", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/BrightnessKbd.sh --dec"), { repeating = true })
+  hl.bind("xf86KbdBrightnessUp", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/BrightnessKbd.sh --inc"), { repeating = true })
+  hl.bind("xf86Launch1", hl.dsp.exec_cmd("rog-control-center"))
+  hl.bind("xf86Launch3", hl.dsp.exec_cmd("asusctl led-mode -n"))
+  hl.bind("xf86Launch4", hl.dsp.exec_cmd("asusctl profile -n"))
+  hl.bind("xf86MonBrightnessDown", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --dec"), { repeating = true })
+  hl.bind("xf86MonBrightnessUp", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --inc"), { repeating = true })
+  hl.bind("xf86TouchpadToggle", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/TouchPad.sh"))
+  hl.bind("SUPER + F6", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --now"))
+  hl.bind("SUPER + SHIFT + F6", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --area"))
+  hl.bind("SUPER + CTRL + F6", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --in5"))
+  hl.bind("SUPER + ALT + F6", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --in10"))
+  hl.bind("ALT + F6", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --active"))
+end
