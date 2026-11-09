@@ -125,7 +125,28 @@ hl.bind("SUPER + CTRL + SHIFT + R", hl.dsp.exec_cmd("pkill rofi || true && $HOME
 hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind("SUPER + CTRL + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
 hl.bind("SUPER + SPACE", hl.dsp.window.float({ action = "toggle" }))
--- TODO migrate allfloat: (bind omitted: "SUPER + ALT + SPACE", hl.dsp.exec_cmd("hyprctl dispatch workspaceopt allfloat"))
+-- Toggle every regular window in the active workspace between floating and tiled.
+-- This replaces the removed workspaceopt allfloat dispatcher.
+hl.bind("SUPER + ALT + SPACE", function()
+  local workspace = hl.get_active_workspace()
+  if not workspace then return end
+  local windows = hl.get_workspace_windows(workspace)
+  if not windows or #windows == 0 then return end
+
+  local all_floating = true
+  for _, window in ipairs(windows) do
+    if not window.floating then
+      all_floating = false
+      break
+    end
+  end
+
+  for _, window in ipairs(windows) do
+    hl.dispatch(hl.dsp.window.float({
+      window = window, action = all_floating and "unset" or "set"
+    }))
+  end
+end)
 hl.bind("SUPER + SHIFT + Return", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Dropterminal.sh kitty"))
 hl.bind("SUPER + ALT + mouse_down", function()
   local factor = math.max(1, tonumber(hl.get_config("cursor.zoom_factor")) or 1)
@@ -143,7 +164,20 @@ hl.bind("SUPER + SHIFT + M", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/Rof
 hl.bind("SUPER + W", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/WallpaperSelect.sh"))
 hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/WallpaperEffects.sh"))
 hl.bind("CTRL + ALT + W", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/WallpaperRandom.sh"))
--- TODO migrate opaque toggle: (bind omitted: "SUPER + CTRL + O", hl.dsp.exec_cmd("hyprctl setprop active opaque toggle"))
+-- Preserve the old opaque-toggle shortcut with the native window property API.
+-- Explicit "1"/"unset" avoids reliance on removed shell-side setprop parsing.
+-- State is per window for the lifetime of this Lua config (reload resets it).
+local opaque_toggles = {}
+hl.bind("SUPER + CTRL + O", function()
+  local window = hl.get_active_window()
+  if not window then return end
+  local key = tostring(window.address)
+  local enabled = not opaque_toggles[key]
+  hl.dispatch(hl.dsp.window.set_prop({
+    window = window, prop = "opaque", value = enabled and "1" or "unset"
+  }))
+  opaque_toggles[key] = enabled
+end)
 hl.bind("SUPER + SHIFT + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/KeyBinds.sh"))
 hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/Animations.sh"))
 hl.bind("SUPER + SHIFT + O", hl.dsp.exec_cmd("$HOME/.config/hypr/UserScripts/ZshChangeTheme.sh"))
