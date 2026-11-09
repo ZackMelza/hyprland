@@ -132,8 +132,13 @@ if [[ -f "$binds_file" ]]; then
     if jq -e 'type == "array"' >/dev/null 2>&1 <<<"$live_json"; then
       live="$(jq length <<<"$live_json")"
       info "Runtime bindings reported: $live"
-      if (( live >= declared / 2 )); then pass 'Substantial runtime binding table present'
-      else warn 'Very few runtime bindings; verify shortcuts manually'; fi
+      if (( live == declared )); then
+        pass 'Runtime binding count matches desktop Lua declarations'
+      elif (( live >= declared / 2 )); then
+        warn "Runtime binding count differs from source ($live active vs $declared declared); reload may be needed or review duplicate binds"
+      else
+        warn 'Very few runtime bindings; verify shortcuts manually'
+      fi
     else warn 'Unable to read runtime binding table'; fi
   fi
   omitted="$(grep -c '^-- TODO migrate ' "$binds_file" || true)"
@@ -198,9 +203,20 @@ elif [[ -r "$logout_file" ]] &&
 else
   warn 'Cannot validate wlogout layout automatically'
 fi
-if command -v systemctl >/dev/null 2>&1 &&
-   systemctl --user is-active --quiet hypr-config-guard.path 2>/dev/null; then
-  warn 'A guard path is active; verify that the installed user unit watches hyprland.lua (not the old .conf)'
+guard_path_unit="$HOME/.config/systemd/user/hypr-config-guard.path"
+if [[ -f "$guard_path_unit" ]] &&
+   grep -qxF 'PathChanged=%h/.config/hypr/hyprland.lua' "$guard_path_unit"; then
+  if command -v systemctl >/dev/null 2>&1 &&
+     systemctl --user is-active --quiet hypr-config-guard.path 2>/dev/null; then
+    pass 'Systemd guard is active and watches hyprland.lua'
+  else
+    warn 'Lua guard unit is installed but is not active'
+  fi
+elif [[ -f "$guard_path_unit" ]] &&
+     grep -qF 'PathChanged=%h/.config/hypr/hyprland.conf' "$guard_path_unit"; then
+  warn 'Installed guard still watches legacy hyprland.conf; run install-lua-guard.sh --check'
+else
+  warn 'Installed Lua guard path unit not found or lacks the expected PathChanged'
 fi
 if grep -q 'link_lua_source' "$root/set-hypr-profile.sh"; then
   pass 'Profile installer has Lua-aware setup with guarded links'
